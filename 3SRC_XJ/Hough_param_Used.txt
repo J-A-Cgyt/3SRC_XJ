@@ -1,0 +1,20 @@
+
+
+
+/*
+	Param_FC.Hough_Method = HOUGH_GRADIENT;
+	Param_FC.dp = 1;
+	Param_FC.mindist = 40;
+	Param_FC.Param1 = 53;
+	Param_FC.Param2 = 50;
+	Param_FC.minRadius = 40;
+	Param_FC.maxRadius = 150;	 //金属机械件检测圆参数3 20200325
+
+	Param_FC.Hough_Method = HOUGH_GRADIENT;
+	Param_FC.dp = 1;
+	Param_FC.mindist = 45;
+	Param_FC.Param1 = 50;
+	Param_FC.Param2 = 50;
+	Param_FC.minRadius = 80;
+	Param_FC.maxRadius = 250;	 //金属机械件检测圆参数4 20200326
+*/

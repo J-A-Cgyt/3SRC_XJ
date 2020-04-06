@@ -1,0 +1,15 @@
+主函数中使用过的测试代码存放
+
+/*  	
+	Temp3 = Canny_边缘(Temp1, 10);
+ 
+    Temp2 = XingTaiXue(Temp1);
+	imshow(Window_Name, Temp2);
+	waitKey(0);
+	
+	Temp3 = Yuzhi_ErJinZhi(Temp3, Thershold);
+	imshow(Window_Name, Temp3);
+	waitKey(0);
+*/
+
+//BY_Contours = BianYuan(Temp3); //橡胶垫
