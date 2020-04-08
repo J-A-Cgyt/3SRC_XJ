@@ -3,7 +3,8 @@
 string Source_Path[10];
 string Window_calib = "Corners_dected";
 
-//用于摄像机标定的函数
+/*用于摄像机标定的函数，总体感觉误差似乎比较大，不如matlab的标定结果更接近S10超广的标称参数，
+但是中心的标定结果是差不多的，只有焦距结果出了差异，从代码实现的角度来说并无问题，难道是因为算法不行？*/
 int Calib_Cgyt(Mat InputOutputArray)
 {
 	//图像加载路径
@@ -34,7 +35,12 @@ int Calib_Cgyt(Mat InputOutputArray)
 	//亚像素角点参数设定
 	cv::Size Window_size = Size(5, 5);
 	cv::Size Zone_0 = Size(-1, -1);
-	cv::TermCriteria Criteria_cgyt = cv::TermCriteria(TermCriteria::EPS, 20, 0.04);
+	//迭代终止条件模板类
+	cv::TermCriteria Criteria_cgyt = cv::TermCriteria(
+		TermCriteria::MAX_ITER + 
+		TermCriteria::EPS, 
+		30,     //最大迭代次数
+		0.01);  //最小精度
 	
 	//检测循环
 	for (int i = 0; i < 10; i++)
@@ -87,9 +93,15 @@ int Calib_Cgyt(Mat InputOutputArray)
 		Src_img[0].size(), 
 		K_CameraMatrix, 
 		distortion, RotationV, MoveV, 
-		CALIB_FIX_K3); //可能因为取消了K3，导致对此类变形较大的超广角的焦距判断失误20200406
+		0); //可能因为取消了K3，导致对此类变形较大的超广角的焦距判断失误20200406 改用0试一下 CALIB_FIX_K3
 
 	cout << K_CameraMatrix << endl;
+
+//畸变矫正测试
+	Mat res;
+	undistort(map, res, K_CameraMatrix, distortion);
+	imshow(Window_calib, res);  //效果好像有点过头了
+	waitKey(0);
 
 	return 0;
 }
