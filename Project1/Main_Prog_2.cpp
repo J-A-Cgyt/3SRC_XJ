@@ -76,8 +76,8 @@ int main()
 
 	//FT_CGYT(Temp_Array[0]);  //傅里叶变换 20200323通过
 
-	int res_state = Calib_Cgyt(Temp_Array[0]);
-	cout << res_state;
+	//int res_state = Calib_Cgyt(Temp_Array[0]); 注释与20200410
+	//cout << res_state;
 
 	return 0;
 }

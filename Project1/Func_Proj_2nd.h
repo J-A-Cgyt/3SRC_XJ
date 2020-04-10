@@ -37,6 +37,8 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> contours); //Zerni
 
 double Solve_Cgyt(double P); //非线性方程组求解函数 方程为 x - 0.5*sin(2 * x) = Pi * P,使用简单迭代方法求解,用以计算矩方法的亚像素坐标值的中间参数
 
+vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> contour, int second = 2); //普通矩方法的亚像素边缘检测重载
+
 #endif // !Self_Blur
 
 #ifndef Pre_Proc
