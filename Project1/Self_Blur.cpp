@@ -269,7 +269,7 @@ double Solve_Cgyt(double P) //非线性方程组求解函数 方程为 x - 0.5*sin(2 * x) = P
 }
 
 //在此处写第二个，基于正常的普通矩的亚像素边缘检测方法。使用几何矩，比较一下OpenCV自带的矩计算方法与模板计算有何区别，使用重载函数，增加一个int型的输入参数用于区分
-vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> contour, int second = 2) //20200408
+vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int second) //20200408
 {
 	vector<Point2d> Res;
 

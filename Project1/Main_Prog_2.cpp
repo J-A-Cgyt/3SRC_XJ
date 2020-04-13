@@ -27,7 +27,7 @@ int main()
 	Mat Temp_Buffer;
 
 	//原始图像组读取
-	SRC_2nd = imread(Load_Path_2nd_6, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(Load_Path_2nd_1, IMREAD_GRAYSCALE);
 
 	if (!SRC_2nd.data)
 	{
@@ -39,16 +39,15 @@ int main()
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
+	Temp_Array.push_back(SRC_2nd);
 
-	//Temp_Array.push_back(SRC_2nd);
-
+/*
 	Temp_Buffer = Thershold_区域(SRC_2nd);
 	Temp_Array.push_back(Temp_Buffer);
 	//Temp_Buffer.release();
 	imshow(window_name, Temp_Array[0]);
 	waitKey(0);
 
-/*		
 	//第二部分的读取代码
 	SRC_2nd = imread(Load_Path_2nd_2, IMREAD_GRAYSCALE);
 	if (!SRC_2nd.data)
@@ -62,6 +61,7 @@ int main()
 	//读取代码结束
 
 	Temp_Buffer = JiaoDian_SURF_CGYT(Temp_Array[0], Temp_Array[1]); //SURF方法+暴力匹配实现 20200215
+
 */
 
 	//vector<Point2f> subPix_Point;
@@ -78,6 +78,8 @@ int main()
 
 	//int res_state = Calib_Cgyt(Temp_Array[0]); 注释与20200410
 	//cout << res_state;
+
+
 
 	return 0;
 }
