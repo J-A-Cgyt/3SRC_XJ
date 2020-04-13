@@ -272,6 +272,120 @@ double Solve_Cgyt(double P) //非线性方程组求解函数 方程为 x - 0.5*sin(2 * x) = P
 vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int second) //20200408
 {
 	vector<Point2d> Res;
+	Mat Temp = Src_2.clone();
+	Temp.convertTo(Temp, CV_64FC1);
+//5*5圆形矩计算模板
+	Mat Moment_00 = (Mat_<double>(5, 5) <<
+		0.0219, 0.1231, 0.1573, 0.1231, 0.0219,
+		0.1231, 0.1600, 0.1600, 0.1600, 0.1231,
+		0.1573, 0.1600, 0.1600, 0.1600, 0.1573,
+		0.1231, 0.1600, 0.1600, 0.1600, 0.1231,
+		0.0219, 0.1231, 0.1573, 0.1231, 0.0219);
+
+	Mat Moment_01 = (Mat_<double>(5, 5) <<
+		-0.0147, -0.0469, 0.0000, 0.0469, 0.0147,
+		-0.0933, -0.0640, 0.0000, 0.0640, 0.0933,
+		-0.1253, -0.0640, 0.0000, 0.0640, 0.1253,
+		-0.0933, -0.0640, 0.0000, 0.0640, 0.0933,
+		-0.0147, -0.0469, 0.0000, 0.0469, 0.0147);
+
+	Mat Moment_10 = (Mat_<double>(5, 5) <<
+	 	 0.0147,  0.0933,  0.1253,  0.0933,  0.0147,
+		 0.0469,  0.0640,  0.0640,  0.0640,  0.0469,
+		 0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+		-0.0469, -0.0640, -0.0640, -0.0640, -0.0469,
+		-0.0147, -0.0933, -0.1253, -0.0933, -0.0147);
+
+	Mat Moment_11 = (Mat_<double>(5, 5) <<
+		-0.0098, -0.0352, 0.0000,  0.0352,  0.0098,
+		-0.0352, -0.0256, 0.0000,  0.0256,  0.0352,
+	 	 0.0000,  0.0000, 0.0000,  0.0000,  0.0000,
+		 0.0352,  0.0256, 0.0000, -0.0256, -0.0352,
+		 0.0098,  0.0352, 0.0000, -0.0352, -0.0098);
+
+	Mat Moment_20 = (Mat_<double>(5, 5) <<
+		0.0099, 0.0194, 0.0021, 0.0194, 0.0099,
+		0.0719, 0.0277, 0.0021, 0.0277, 0.0719,
+		0.1019, 0.0277, 0.0021, 0.0277, 0.1019,
+		0.0719, 0.0277, 0.0021, 0.0277, 0.0719,
+		0.0099, 0.0194, 0.0021, 0.0194, 0.0099);
+
+	Mat Moment_02 = (Mat_<double>(5, 5) << 
+		0.0099, 0.0719, 0.1019, 0.0719, 0.0099,
+		0.0194, 0.0277, 0.0277, 0.0277, 0.0194,
+		0.0021, 0.0021, 0.0021, 0.0021, 0.0021,
+		0.0194, 0.0277, 0.0277, 0.0277, 0.0194,
+		0.0099, 0.0719, 0.1019, 0.0719, 0.0099);
+
+//最外层循环
+	Mat RoI;
+	struct Moments_cgyt
+	{
+		double M_00;
+		double M_01;
+		double M_10;
+		double M_11;
+		double M_20;
+		double M_02;
+
+	   #define MR_00 M_00;
+		double MR_10;
+		double MR_20;
+		double MR_02;
+	};
+
+	vector<Moments_cgyt> MomentsArray;
+	vector<double> L_Array;
+	vector<double> phi_Array;
+	vector<vector<double>> SubPix_Params;
+
+	MomentsArray.resize(Contours_2.size());
+	L_Array.resize(Contours_2.size());
+	phi_Array.resize(Contours_2.size());
+
+	SubPix_Params.push_back(L_Array);
+	SubPix_Params.push_back(phi_Array);
+
+	for (int i = 0; i < Contours_2.size(); i++)
+	{
+		RoI = Temp(Rect(Contours_2[i].x - 2, Contours_2[i].y - 2, 5, 5));
+		
+		MomentsArray[i].M_00 = RoI.dot(Moment_00);
+		MomentsArray[i].M_01 = RoI.dot(Moment_01);
+		MomentsArray[i].M_10 = RoI.dot(Moment_10);
+		MomentsArray[i].M_11 = RoI.dot(Moment_11);
+		MomentsArray[i].M_20 = RoI.dot(Moment_20);
+		MomentsArray[i].M_02 = RoI.dot(Moment_02);
+
+		MomentsArray[i].MR_10 = sqrt(
+			MomentsArray[i].M_01*MomentsArray[i].M_01 +
+			MomentsArray[i].M_10*MomentsArray[i].M_10);
+		
+		MomentsArray[i].MR_20 = (
+			(MomentsArray[i].M_10*MomentsArray[i].M_10*MomentsArray[i].M_20 +
+		 2 * MomentsArray[i].M_01*MomentsArray[i].M_11*MomentsArray[i].M_10 +
+			 MomentsArray[i].M_01*MomentsArray[i].M_01*MomentsArray[i].M_02)
+			/
+			(MomentsArray[i].M_01*MomentsArray[i].M_01 +
+			 MomentsArray[i].M_10*MomentsArray[i].M_10)
+			);
+
+		MomentsArray[i].MR_02 = (
+			(MomentsArray[i].M_10*MomentsArray[i].M_10*MomentsArray[i].M_20 -
+		 2 * MomentsArray[i].M_01*MomentsArray[i].M_11*MomentsArray[i].M_10 +
+			 MomentsArray[i].M_01*MomentsArray[i].M_01*MomentsArray[i].M_02)
+			/
+			(MomentsArray[i].M_01*MomentsArray[i].M_01 +
+			 MomentsArray[i].M_10*MomentsArray[i].M_10)
+			);
+	}
+
+	for (int i = 0; i < Contours_2.size(); i++)
+	{
+		L_Array[i] = (4 * MomentsArray[i].MR_20 - MomentsArray[i].M_00) / (3 * MomentsArray[i].MR_10);
+		phi_Array[i] = atan(MomentsArray[i].M_01 / MomentsArray[i].M_10);
+	}
+
 
 	return Res;
 }
