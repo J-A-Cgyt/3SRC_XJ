@@ -274,7 +274,7 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int 
 	vector<Point2d> Res;
 	Mat Temp = Src_2.clone();
 	Temp.convertTo(Temp, CV_64FC1);
-//5*5圆形矩计算模板
+//5*5圆形矩计算模板 归一化空间矩，模板大小5*5 计算所得的L绝对值应不会超过1，但其为1时的像素长度为2.5，在下面的计算反算为像素坐标时注意倍率
 	Mat Moment_00 = (Mat_<double>(5, 5) <<
 		0.0219, 0.1231, 0.1573, 0.1231, 0.0219,
 		0.1231, 0.1600, 0.1600, 0.1600, 0.1231,
@@ -346,17 +346,18 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int 
 	SubPix_Params.push_back(L_Array);
 	SubPix_Params.push_back(phi_Array);
 
+	//矩计算循环
 	for (int i = 0; i < Contours_2.size(); i++)
 	{
 		RoI = Temp(Rect(Contours_2[i].x - 2, Contours_2[i].y - 2, 5, 5));
-		
+	//未经旋转前的前三借矩，由蒙版与ROI点乘直接算得
 		MomentsArray[i].M_00 = RoI.dot(Moment_00);
 		MomentsArray[i].M_01 = RoI.dot(Moment_01);
 		MomentsArray[i].M_10 = RoI.dot(Moment_10);
 		MomentsArray[i].M_11 = RoI.dot(Moment_11);
 		MomentsArray[i].M_20 = RoI.dot(Moment_20);
 		MomentsArray[i].M_02 = RoI.dot(Moment_02);
-
+	//经过旋转的部分前三阶矩，根据与原始前三阶矩的关系算得
 		MomentsArray[i].MR_10 = sqrt(
 			MomentsArray[i].M_01*MomentsArray[i].M_01 +
 			MomentsArray[i].M_10*MomentsArray[i].M_10);
@@ -380,12 +381,25 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int 
 			);
 	}
 
+	//亚像素参数计算循环，主要是边缘到圆心距离L和L与x轴正方向所成角，注意此处角度应以逆时针为正，但图像坐标y轴向下为正，注意换算关系
 	for (int i = 0; i < Contours_2.size(); i++)
 	{
 		L_Array[i] = (4 * MomentsArray[i].MR_20 - MomentsArray[i].M_00) / (3 * MomentsArray[i].MR_10);
 		phi_Array[i] = atan(MomentsArray[i].M_01 / MomentsArray[i].M_10);
 	}
 
+	Res.resize(Contours_2.size());
+	for (int i = 0; i < Contours_2.size(); i++)
+	{
+		//像素坐标x计算
+		Res[i].x = double(Contours_2[i].x) + 
+						  2.5 * L_Array[i] * cos(phi_Array[i]) + 
+						  0.5;
+		//像素坐标y计算
+		Res[i].y = double(Contours_2[i].y) - 
+						  2.5 * L_Array[i] * sin(phi_Array[i]) + 
+						  0.5;
+	}
 
 	return Res;
 }
