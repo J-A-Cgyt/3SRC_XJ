@@ -41,6 +41,71 @@ Mat NLM_CGYT(Mat Src)
 	return temp;
 }
 
+//各向异性扩撒滤波 启动时间20200421
+/*
+	对函数参数的说明：
+	K：模拟热传导系数
+	Lamda：求和权重
+	Iter：迭代循环次数
+*/
+Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter)
+{
+	double Ni, Si, Wi, Ei; //四向梯度
+	double Nc, Sc, Wc, Ec; //四向导热系数
+	double PixValue;
+	Mat temp = Src.clone();
+	if(temp.type()==CV_8UC1)
+	{
+		temp.convertTo(temp,CV_64FC1);
+	}
+	else if (temp.type() == CV_8UC3)
+	{
+		vector<Mat> channels;
+		split(temp, channels);
+		channels[0] = Anisotropic_Cgyt(channels[0], K, Lamda, Iter);
+		channels[1] = Anisotropic_Cgyt(channels[1], K, Lamda, Iter);
+		channels[2] = Anisotropic_Cgyt(channels[2], K, Lamda, Iter);
+		merge(channels, temp);
+		return temp;
+	}
+	else
+	{
+		cout << "Type Error: Type of matrix must be CV_8UC3 or CV_*UC1" << endl;
+		return Mat();
+	}
+	if (Iter < 1)
+	{
+		cout << "迭代次数K必须>0" << endl;
+		return Mat();
+	}
+
+	double K2 = K * K;
+	while (Iter > 0)
+	{
+		for (int i = 1; i < temp.cols - 1; i++)
+		{
+			for (int j = 1; j < temp.rows - 1; j++)
+			{
+				Wi = temp.at<double>(j, i - 1) - temp.at<double>(j, i);
+				Ni = temp.at<double>(j - 1, i) - temp.at<double>(j, i);
+				Ei = temp.at<double>(j, i + 1) - temp.at<double>(j, i);
+				Si = temp.at<double>(j + 1, i) - temp.at<double>(j, i);
+
+				Nc = exp(-Ni * Ni / K2);
+				Sc = exp(-Si * Si / K2);
+				Wc = exp(-Wi * Wi / K2);
+				Ec = exp(-Ei * Ei / K2);
+
+				PixValue = temp.at<double>(j, i) + Lamda * (Ni * Nc + Si * Sc + Wi * Wc + Ei * Ec);
+				temp.at<double>(j, i) = PixValue;
+			}
+		}
+		Iter =Iter - 1;
+	}
+	normalize(temp, temp, 0, 255, NORM_MINMAX);
+	temp.convertTo(temp, CV_8UC1);
+	return temp;
+}
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
