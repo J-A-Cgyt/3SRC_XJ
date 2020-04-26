@@ -36,6 +36,9 @@
     <ClCompile Include="Calib_CGYT.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MultiThread.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Func_Proj_2nd.h">

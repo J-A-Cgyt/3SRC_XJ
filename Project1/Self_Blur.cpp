@@ -15,7 +15,7 @@ Mat Gaosi_双边(Mat Src) //高斯双边滤波与锐化，保持边缘的滤波 2019/11/14,从测试与
 									  0, -1, 0);
 
 	filter2D(Dst, Dst, Dst.depth(), Filter);
-
+	//对于噪声较多的还是考虑用强度大一点的双边滤波吧
 	return Dst;
 }
 
@@ -35,6 +35,7 @@ Mat NLM_CGYT(Mat Src)
 	templateWindowSize : 奇数。(推荐值为 7)
 	searchWindowSize : 奇数。(推荐值为 21)
 	相关原理见NoteExpress文献笔记 “基于Zernike矩亚像素的高反光金属工件缺陷检测”
+	这个方法居然比自己写的还要慢，好歹是有多线程优化的吧，效果真的好，实时性真的差
 	*/
 	imshow(window_name_f3, temp);
 	waitKey(0);
@@ -43,20 +44,27 @@ Mat NLM_CGYT(Mat Src)
 
 //各向异性扩撒滤波 启动时间20200421
 /*
+	其是双边滤波的简化，速度较快，功能稍弱
 	对函数参数的说明：
 	K：模拟热传导系数
 	Lamda：求和权重
 	Iter：迭代循环次数
 */
-Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter)
+Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter) //效果存疑 似乎有种整体滤波保持边缘却锐化细节的感觉，怪怪的
 {
 	double Ni, Si, Wi, Ei; //四向梯度
 	double Nc, Sc, Wc, Ec; //四向导热系数
 	double PixValue;
-	Mat temp = Src.clone();
+	Mat temp = Src.clone();	
 	if(temp.type()==CV_8UC1)
 	{
 		temp.convertTo(temp,CV_64FC1);
+		/*
+		cout << temp.at<double>(400, 400) << endl;
+		cout << temp.at<double>(401, 400) << endl;
+		cout << temp.at<double>(400, 401) << endl;
+		cout << temp.at<double>(401, 401) << endl;
+		*/
 	}
 	else if (temp.type() == CV_8UC3)
 	{
@@ -77,8 +85,8 @@ Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter)
 	{
 		cout << "迭代次数K必须>0" << endl;
 		return Mat();
-	}
-
+	}	
+	Mat temp2 = temp.clone();
 	double K2 = K * K;
 	while (Iter > 0)
 	{
@@ -97,12 +105,31 @@ Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter)
 				Ec = exp(-Ei * Ei / K2);
 
 				PixValue = temp.at<double>(j, i) + Lamda * (Ni * Nc + Si * Sc + Wi * Wc + Ei * Ec);
-				temp.at<double>(j, i) = PixValue;
-			}
+				if (PixValue > 255)
+				{
+					temp2.at<double>(j, i) = 255;
+				}
+				else if (PixValue < 0)
+				{
+					temp2.at<double>(j, i) = 0;
+				}
+				else
+				{
+					temp2.at<double>(j, i) = PixValue;
+				}				
+			}						
 		}
+		/*
+		//数值测试
+		cout << temp2.at<double>(400, 400) << endl;
+		cout << temp2.at<double>(401, 400) << endl;
+		cout << temp2.at<double>(400, 401) << endl;
+		cout << temp2.at<double>(401, 401) << endl;
+		*/
+		temp = temp2.clone();
 		Iter =Iter - 1;
 	}
-	normalize(temp, temp, 0, 255, NORM_MINMAX);
+	//normalize(temp, temp, 0, 255, NORM_MINMAX);
 	temp.convertTo(temp, CV_8UC1);
 	return temp;
 }

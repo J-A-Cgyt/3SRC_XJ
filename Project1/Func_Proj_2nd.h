@@ -29,6 +29,8 @@ Mat Gaosi_Ë«±ß(Mat Src); //¸ßË¹Ë«±ßÂË²¨ÓëÈñ»¯£¬±£³Ö±ßÔµµÄÂË²¨ 2019/11/14,´Ó²âÊÔÓ
 
 Mat NLM_CGYT(Mat Src); //NLM£¬·Ç¾Ö²¿¾ùÖµÂË²¨
 
+Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter); //¸÷ÏòÒìĞÔÀ©É¢ÂË²¨ 20200421
+
 int Hu_Ju_CGYT(Mat Src,double* Hu_Ju); //Hu¾Ø¼ÆËã·½·¨£¬ÊäÈëÍ¼Ïñ
 
 int Hu_Ju_CGYT(vector<Point> Contour,double* Hu_Ju); //Hu¾Ø¼ÆËã·½·¨,ÊäÈëµã¼¯
@@ -73,5 +75,7 @@ vector<Point2f> subPix_pt(Mat Src); //ÔÚÒÑÓĞÏñËØ¼¶½Çµã¼ì²â½á¹ûµÄ»ù´¡ÉÏÏ¸»¯£¬Ê¹ÓÃ
 int TrackBar_cgyt_canny(int, char** argv);
 
 static void CannyThreshold(int, void*);
+
+Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter); //¶àÏß³Ì¸ÄÔì³¢ÊÔ
 
 #endif // !buffer
