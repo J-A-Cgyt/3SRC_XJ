@@ -42,7 +42,7 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ğ§¹û´æÒÉ ËÆº
 	thread t2 = thread(Scan_MT,temp,temp2,bound+1,2*bound,Iter,K2,Lamda);
 	thread t3 = thread(Scan_MT, temp, temp2, 2 * bound + 1, 3 * bound, Iter, K2, Lamda);
 	thread t4 = thread(Scan_MT, temp, temp2, 3*bound+1, temp.cols, Iter, K2, Lamda);
-
+	//µÈ´ıÏß³ÌÍ¬²½Íê³É
 	t1.join();
 	t2.join();
 	t3.join();
@@ -52,7 +52,7 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ğ§¹û´æÒÉ ËÆº
 	temp.convertTo(temp, CV_8UC1);
 	return temp;
 }
-
+//¶àÏß³ÌµÄºËº¯Êı
 void Scan_MT(Mat Src,Mat Res, int Start, int End, 
 	unsigned char Iter2,
 	double K2,double Lamda) //´Ë´¦ÊäÈëµÄµÄSrc,ResÀàĞÍ±ØĞëÊÇCV_64FC1 ·ñÔò±¨´í
