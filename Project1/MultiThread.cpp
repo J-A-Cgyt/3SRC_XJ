@@ -38,8 +38,8 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ð§¹û´æÒÉ ËÆº
 	Mat temp2 = temp.clone();
 
 	int bound = temp.cols / 4;
-	thread t1 = thread(Scan_MT,temp,temp2,1,bound,Iter,K2,Lamda);
-	thread t2 = thread(Scan_MT,temp,temp2,bound+1,2*bound,Iter,K2,Lamda);
+	thread t1 = thread(Scan_MT, temp, temp2, 1, bound, Iter, K2, Lamda);
+	thread t2 = thread(Scan_MT, temp, temp2, bound + 1, 2 * bound, Iter, K2, Lamda);
 	thread t3 = thread(Scan_MT, temp, temp2, 2 * bound + 1, 3 * bound, Iter, K2, Lamda);
 	thread t4 = thread(Scan_MT, temp, temp2, 3*bound+1, temp.cols, Iter, K2, Lamda);
 	//µÈ´ýÏß³ÌÍ¬²½Íê³É

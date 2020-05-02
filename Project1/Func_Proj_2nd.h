@@ -78,4 +78,6 @@ static void CannyThreshold(int, void*);
 
 Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter); //多线程改造尝试
 
+Mat WaveLetHarrD_CGYT(Mat Src, int LevelCount);//小波分解尝试，应是harr小波类型，别的类型小波还没找到具体的算法思路
+
 #endif // !buffer

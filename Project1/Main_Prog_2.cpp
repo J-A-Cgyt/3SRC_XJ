@@ -28,7 +28,7 @@ int main()
 	Mat Temp_Buffer;
 
 	//原始图像组读取
-	SRC_2nd = imread(Load_Path_2nd_7, IMREAD_COLOR);
+	SRC_2nd = imread(Load_Path_2nd_1, IMREAD_COLOR);
 
 	if (!SRC_2nd.data)
 	{
@@ -81,9 +81,11 @@ int main()
 	imwrite("G:\\Pictures\\Test For Programming\\003.2.jpg", Temp_Buffer);
 	cout << "end" << endl;
 	waitKey(0);
+	
+	Temp_Buffer = AnisotropicMT_Cgyt(Temp_Array[0], 20, 0.75, 10);
 */
 
-	Temp_Buffer = AnisotropicMT_Cgyt(Temp_Array[0], 20, 0.75, 10);
+	Temp_Buffer = WaveLetHarrD_CGYT(Temp_Array[0], 1);
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
 
