@@ -28,7 +28,7 @@ int main()
 	Mat Temp_Buffer;
 
 	//原始图像组读取
-	SRC_2nd = imread(Load_Path_2nd_1, IMREAD_COLOR);
+	SRC_2nd = imread(Load_Path_2nd_1, IMREAD_GRAYSCALE);
 
 	if (!SRC_2nd.data)
 	{
@@ -36,7 +36,7 @@ int main()
 		return -1;
 	}
 
-	namedWindow(window_name, WINDOW_NORMAL);
+	namedWindow(window_name, WINDOW_AUTOSIZE);
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
@@ -87,6 +87,10 @@ int main()
 
 	Temp_Buffer = WaveLetHarrD_CGYT(Temp_Array[0], 1);
 	imshow(window_name, Temp_Buffer);
+	waitKey(0);
+
+	Temp_Array[0] = WaveLetHarrR_CGYT(Temp_Buffer, 1);
+	imshow(window_name, Temp_Array[0]);
 	waitKey(0);
 
 	return 0;

@@ -80,4 +80,6 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter); //¶àÏß³Ì¸ÄÔì³
 
 Mat WaveLetHarrD_CGYT(Mat Src, int LevelCount);//Ğ¡²¨·Ö½â³¢ÊÔ£¬Ó¦ÊÇharrĞ¡²¨ÀàĞÍ£¬±ğµÄÀàĞÍĞ¡²¨»¹Ã»ÕÒµ½¾ßÌåµÄËã·¨Ë¼Â·
 
+Mat WaveLetHarrR_CGYT(Mat Src, int LevelCount);//Ğ¡²¨·Ö½â½á¹ûºÏ²¢
+
 #endif // !buffer
