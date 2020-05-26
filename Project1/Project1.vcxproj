@@ -121,6 +121,7 @@
     <ClCompile Include="canny_TrackBar.cpp" />
     <ClCompile Include="Cgyt_conv.cpp" />
     <ClCompile Include="Features2nd.cpp" />
+    <ClCompile Include="IrisDect.cpp" />
     <ClCompile Include="Main_Prog_2.cpp" />
     <ClCompile Include="MultiThread.cpp" />
     <ClCompile Include="Pre_proc.cpp" />

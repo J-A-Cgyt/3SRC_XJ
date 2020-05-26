@@ -7,6 +7,7 @@ string Load_Path_2nd_4 = "G:\\Pictures\\Test For Programming\\加弹簧.bmp"; // su
 string Load_Path_2nd_5 = "G:\\Pictures\\Test For Programming\\香蕉3.jpg"; // subPixel_Contours detect by Moments
 string Load_Path_2nd_6 = "G:\\Pictures\\Test For Programming\\sign_20200329.jpg"; // subPixel_Contours detect by Moments
 string Load_Path_2nd_7 = "G:\\Pictures\\Test For Programming\\003.1.jpg"; // subPixel_Contours detect by Moments
+string Load_Path_2nd_8 = "G:\\Pictures\\Test For Programming\\eye.jpg"; // subPixel_Contours detect by Moments
 
 string window_name = "Demo_Result"; //结果显示窗
 
@@ -28,7 +29,7 @@ int main()
 	Mat Temp_Buffer;
 
 	//原始图像组读取
-	SRC_2nd = imread(Load_Path_2nd_1, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(Load_Path_2nd_8, IMREAD_GRAYSCALE);
 
 	if (!SRC_2nd.data)
 	{
