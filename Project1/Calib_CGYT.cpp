@@ -7,7 +7,7 @@ string Window_calib = "Corners_dected";
 但是中心的标定结果是差不多的，只有焦距结果出了差异，从代码实现的角度来说并无问题，难道是因为算法不行？*/
 int Calib_Cgyt(Mat InputOutputArray)
 {
-	//图像加载路径
+	//图像加载路径（于XPS15 9550）
 	Source_Path[0] = "G:\\Pictures\\Test For Programming\\calb13\\1.jpg";
 	Source_Path[1] = "G:\\Pictures\\Test For Programming\\calb13\\2.jpg";
 	Source_Path[2] = "G:\\Pictures\\Test For Programming\\calb13\\3.jpg";
