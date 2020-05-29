@@ -26,7 +26,7 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ð§¹û´æÒÉ ËÆº
 	}
 	else
 	{
-		cout << "Type Error: Type of matrix must be CV_8UC3 or CV_*UC1" << endl;
+		cout << "Type Error: Type of matrix must be CV_8UC3 or CV_8UC1" << endl;
 		return Mat();
 	}
 	if (Iter < 1)
@@ -41,7 +41,7 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ð§¹û´æÒÉ ËÆº
 	thread t1 = thread(Scan_MT, temp, temp2, 1, bound, Iter, K2, Lamda);
 	thread t2 = thread(Scan_MT, temp, temp2, bound + 1, 2 * bound, Iter, K2, Lamda);
 	thread t3 = thread(Scan_MT, temp, temp2, 2 * bound + 1, 3 * bound, Iter, K2, Lamda);
-	thread t4 = thread(Scan_MT, temp, temp2, 3*bound+1, temp.cols, Iter, K2, Lamda);
+	thread t4 = thread(Scan_MT, temp, temp2, 3 * bound + 1, temp.cols - 1, Iter, K2, Lamda);
 	//µÈ´ýÏß³ÌÍ¬²½Íê³É
 	t1.join();
 	t2.join();
@@ -53,7 +53,7 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ð§¹û´æÒÉ ËÆº
 	return temp;
 }
 //¶àÏß³ÌµÄºËº¯Êý
-void Scan_MT(Mat Src,Mat Res, int Start, int End, 
+void Scan_MT(Mat Src, Mat Res, int Start, int End, 
 	unsigned char Iter2,
 	double K2,double Lamda) //´Ë´¦ÊäÈëµÄµÄSrc,ResÀàÐÍ±ØÐëÊÇCV_64FC1 ·ñÔò±¨´í
 {
@@ -94,6 +94,7 @@ void Scan_MT(Mat Src,Mat Res, int Start, int End,
 					temp2.at<double>(j, i) = PixValue;
 				}
 			}
+			//cout << i << endl;
 		}
 		temp = temp2.clone();
 		Iter2 = Iter2 - 1;
