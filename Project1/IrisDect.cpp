@@ -2,7 +2,7 @@
 #include <opencv2/cudaimgproc.hpp>
 #include <thread>
 
-Point2f IrisDect(Mat Src,int method)
+Point3f IrisDect(Mat Src,int method)
 {
 //霍夫变换的检测方法
 	if (method == 0)
@@ -24,15 +24,16 @@ Point2f IrisDect(Mat Src,int method)
 
 		HoughCircles(tempA, Circles, Hough_Method, dp, mindist, Param1, Param2, minRadius, maxRadius);
 		
-		Point2f CenterCord;
+		Point3f CenterCord;
 		//检测个圆先看看
 		cvtColor(Src, tempA, COLOR_GRAY2BGR);
 		for (int i = 0; i < Circles.size(); i++)
 		{
 			CenterCord.x = Circles[i].val[0];
 			CenterCord.y = Circles[i].val[1];
+			CenterCord.z = Circles[i].val[2];
 
-			circle(tempA, CenterCord,
+			circle(tempA, Point(CenterCord.x, CenterCord.y),
 				int(Circles[i].val[2]), Scalar(0, 0, 255), 3);
 		}
 		imshow("Demo_Result", tempA);
@@ -67,7 +68,8 @@ Point2f IrisDect(Mat Src,int method)
 		vector<vector<Point>> Contours;
 		vector<Point> IrisContour;	
 		Moments Mu;
-		size_t Length;
+		float Radius; //拟合圆的半径
+		float Pi = 3.1415926; //圆周率
 		int index;
 		findContours(tempB2, Contours, RETR_EXTERNAL, CHAIN_APPROX_NONE);		
 		cvtColor(Src, tempB1, COLOR_GRAY2BGR);
@@ -88,12 +90,14 @@ Point2f IrisDect(Mat Src,int method)
 			}
 		}
 		IrisContour = Contours[index];
-		
-		Point2f CenterCord;
+		Radius = sqrt(Mu.m00 / Pi);
+		Point3f CenterCord;
 		CenterCord.x = Mu.m10 / Mu.m00;
 		CenterCord.y = Mu.m01 / Mu.m00;
+		CenterCord.z = Radius;
+
 		return CenterCord;
 	}
 	cout << "方法代码必须是0或1" << endl;
-	return Point2f();
+	return Point3f();
 }

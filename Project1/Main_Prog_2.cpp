@@ -54,10 +54,10 @@ int main()
 	waitKey(0);
 	Temp_Array.push_back(SRC_2nd);
 	
-	Point2f center;
+	Point3f center;
 	center = IrisDect(Temp_Array[0],COUNTOUR);
 	cvtColor(SRC_2nd, Temp_Buffer, COLOR_GRAY2BGR);
-	circle(Temp_Buffer, Point(center), 130, Scalar(0, 0, 255), 3);
+	circle(Temp_Buffer, Point(center.x, center.y), center.z, Scalar(0, 0, 255), 3);
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
 
