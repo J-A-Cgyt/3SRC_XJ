@@ -53,8 +53,13 @@ int main()
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
 	Temp_Array.push_back(SRC_2nd);
-
-	IrisDect(Temp_Array[0],COUNTOUR);
+	
+	Point2f center;
+	center = IrisDect(Temp_Array[0],COUNTOUR);
+	cvtColor(SRC_2nd, Temp_Buffer, COLOR_GRAY2BGR);
+	circle(Temp_Buffer, Point(center), 130, Scalar(0, 0, 255), 3);
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
 
 /*
 	Temp_Buffer = Thershold_ÇøÓò(SRC_2nd);

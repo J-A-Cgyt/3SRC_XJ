@@ -5,7 +5,7 @@ Mat Gaosi_双边(Mat Src) //高斯双边滤波与锐化，保持边缘的滤波 2019/11/14,从测试与
 {
 	int d = 0;
 	double Sigma_Color = 100;
-	double Sigma_Space = 15;
+	double Sigma_Space = 5;   //sigma=5为虹膜检测参数 20200530
 	Mat Dst;
 	bilateralFilter(Src, Dst, d, Sigma_Color, Sigma_Space);
 

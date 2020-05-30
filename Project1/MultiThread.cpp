@@ -18,9 +18,9 @@ Mat AnisotropicMT_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ð§¹û´æÒÉ ËÆº
 	{
 		vector<Mat> channels;
 		split(temp, channels);
-		channels[0] = Anisotropic_Cgyt(channels[0], K, Lamda, Iter);
-		channels[1] = Anisotropic_Cgyt(channels[1], K, Lamda, Iter);
-		channels[2] = Anisotropic_Cgyt(channels[2], K, Lamda, Iter);
+		channels[0] = AnisotropicMT_Cgyt(channels[0], K, Lamda, Iter);
+		channels[1] = AnisotropicMT_Cgyt(channels[1], K, Lamda, Iter);
+		channels[2] = AnisotropicMT_Cgyt(channels[2], K, Lamda, Iter);
 		merge(channels, temp);
 		return temp;
 	}
