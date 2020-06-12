@@ -40,6 +40,7 @@ Point3f IrisDect(Mat Src,int method)
 		waitKey(0);
 		return CenterCord;
 	}
+//特征检测的方法
 	else if (method == 1)
 	{
 		Mat tempB1 = Src.clone();		
@@ -98,6 +99,8 @@ Point3f IrisDect(Mat Src,int method)
 
 		return CenterCord;
 	}
+//能不能根据HSV色彩空间进行检测呢
+
 	cout << "方法代码必须是0或1" << endl;
 	return Point3f();
 }

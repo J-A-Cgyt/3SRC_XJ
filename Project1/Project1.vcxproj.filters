@@ -45,6 +45,9 @@
     <ClCompile Include="IrisDect.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CUDA_Try.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Func_Proj_2nd.h">
