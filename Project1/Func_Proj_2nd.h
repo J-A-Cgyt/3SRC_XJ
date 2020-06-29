@@ -82,4 +82,5 @@ Mat WaveLetHarrD_CGYT(Mat Src, int LevelCount);//–°≤®∑÷Ω‚≥¢ ‘£¨”¶ «harr–°≤®¿‡–Õ£
 
 Mat WaveLetHarrR_CGYT(Mat Src, int LevelCount);//–°≤®∑÷Ω‚Ω·π˚∫œ≤¢
 
+Point2f IrisDect(Mat Src);
 #endif // !buffer

@@ -36,6 +36,8 @@ int main()
 		cout << "读取失败" << endl;
 		return -1;
 	}
+	//摄像机控制
+	VideoCapture Cam1;
 
 	namedWindow(window_name, WINDOW_NORMAL);
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
@@ -43,6 +45,27 @@ int main()
 	waitKey(0);
 	Temp_Array.push_back(SRC_2nd);
 
+	vector<Point2f> IrisCords;
+	int pressedKey;
+	long int index = 0;
+	Mat moveMap = Mat();
+	moveMap.zeros(Size(1920, 1080), CV_8UC3);
+
+	while(1) //此循环不可运行
+	{
+		IrisCords.push_back(IrisDect(Mat())); //还没有明确的图像，把轨迹绘制先写一下吧
+		pressedKey = waitKey(30);
+		if(pressedKey == 'e')
+		{
+			break;
+		}
+		if (index == 0)
+		{
+			circle(moveMap, IrisCords[index], 2, Scalar(0, 0, 255));
+		}
+		index++;
+	}
+	
 /*
 	Temp_Buffer = Thershold_区域(SRC_2nd);
 	Temp_Array.push_back(Temp_Buffer);
