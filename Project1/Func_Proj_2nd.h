@@ -84,4 +84,6 @@ Mat WaveLetHarrD_CGYT(Mat Src, int LevelCount);//–°≤®∑÷Ω‚≥¢ ‘£¨”¶ «harr–°≤®¿‡–Õ£
 
 Mat WaveLetHarrR_CGYT(Mat Src, int LevelCount);//–°≤®∑÷Ω‚Ω·π˚∫œ≤¢
 
+Mat GPU_func_study(Mat Src1, Mat Src2);
+
 #endif // !buffer

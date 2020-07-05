@@ -32,7 +32,7 @@ int main()
 		cout << "Í¼Ïñ¶ÁÈ¡Ê§°Ü" << endl;
 		return -1;
 	}
-	
+
 	//resize(SRC, SRC, Size(800, 600));
 	Mat Map = SRC.clone();//¸ÃÍ¼Ïñ£¨¾ØÕó£©ÓÃÓÚ±êÊ¶ÌØÕ÷
 	cvtColor(SRC, SRC, COLOR_BGR2GRAY);
