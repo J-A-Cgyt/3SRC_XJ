@@ -131,3 +131,13 @@
 	Temp_Buffer = NLM_CGYT(Temp_Array[0]); //也是属于实时性极差，如果没有并行计算加速，几乎不可能
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
+
+
+GPU初次测试，图像加减的配合代码  20200706转移
+	SRC_2nd = imread(LoadPath_Msi_2, IMREAD_COLOR);
+	Temp_Buffer = imread(LoadPath_Msi_3, IMREAD_COLOR);
+	Temp_Array.push_back(SRC_2nd);
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
+	Temp_Array.push_back(Temp_Buffer);
+	GPU_func_study(Temp_Array[0], Temp_Array[1]);

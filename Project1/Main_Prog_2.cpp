@@ -14,6 +14,7 @@ string Load_Path_2nd_8 = "G:\\Pictures\\Test For Programming\\eye.jpg"; // subPi
 string LoadPath_Msi_1 = "F:\\Pictures\\Test For Programming\\eye.jpg";
 string LoadPath_Msi_2 = "F:\\Pictures\\Test For Programming\\DSC_15774.jpg";
 string LoadPath_Msi_3 = "F:\\Pictures\\Test For Programming\\DSC_15774-4.jpg";
+string LoadPath_Msi_4 = "F:\\Pictures\\Test For Programming\\天山天池拼.jpg";
 
 /*-----------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -41,24 +42,20 @@ int main()
 	std::vector<Mat> Temp_Array;
 	Mat Temp_Buffer;
 
-	//原始图像组读取
-	SRC_2nd = imread(LoadPath_Msi_2, IMREAD_COLOR);
+	//原始图像组读取	
+	SRC_2nd = imread(LoadPath_Msi_4, IMREAD_GRAYSCALE);
 	if (!SRC_2nd.data)
 	{
 		cout << "读取失败" << endl;
 		return -1;
 	}
-	Temp_Buffer = imread(LoadPath_Msi_3, IMREAD_COLOR);
 	namedWindow(window_name, WINDOW_NORMAL);
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
-	Temp_Array.push_back(SRC_2nd);
-	imshow(window_name, Temp_Buffer);
-	waitKey(0);
-	Temp_Array.push_back(Temp_Buffer);
+	//IrisDectH_GPU(SRC_2nd);
+	//ORBG_cgyt(SRC_2nd);
 
-	GPU_func_study(Temp_Array[0], Temp_Array[1]);
 /*	
 	Point3f center;
 	center = IrisDect(Temp_Array[0],COUNTOUR);

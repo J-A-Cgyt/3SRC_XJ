@@ -69,6 +69,10 @@ vector<Point2f> subPix_pt(Mat Src); //ÔÚÒÑÓĞÏñËØ¼¶½Çµã¼ì²â½á¹ûµÄ»ù´¡ÉÏÏ¸»¯£¬Ê¹ÓÃ
 
 Point3f IrisDect(Mat Src,int method);  //ºçÄ¤Î»ÖÃ¼ì²â
 
+Point3f IrisDectH_GPU(Mat Src);
+
+int ORBG_cgyt(Mat Src);
+
 #endif // !Features2nd
 
 
@@ -85,5 +89,7 @@ Mat WaveLetHarrD_CGYT(Mat Src, int LevelCount);//Ğ¡²¨·Ö½â³¢ÊÔ£¬Ó¦ÊÇharrĞ¡²¨ÀàĞÍ£
 Mat WaveLetHarrR_CGYT(Mat Src, int LevelCount);//Ğ¡²¨·Ö½â½á¹ûºÏ²¢
 
 Mat GPU_func_study(Mat Src1, Mat Src2);
+
+int SURFG_cgyt(Mat Src1, Mat Src2);
 
 #endif // !buffer
