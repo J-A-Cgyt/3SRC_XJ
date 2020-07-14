@@ -41,20 +41,32 @@ int main()
 {
 	std::vector<Mat> Temp_Array;
 	Mat Temp_Buffer;
+	//namedWindow(window_name, WINDOW_NORMAL);
+	namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_4, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_2, IMREAD_GRAYSCALE);
 	if (!SRC_2nd.data)
 	{
 		cout << "读取失败" << endl;
 		return -1;
 	}
-	namedWindow(window_name, WINDOW_NORMAL);
-	//namedWindow(window_name, WINDOW_AUTOSIZE);
+	Temp_Buffer = imread(LoadPath_Msi_3, IMREAD_GRAYSCALE); //此段读取代码直接删
+	if (!Temp_Buffer.data)
+	{
+		cout << "读取失败" << endl;
+		return -1;
+	}
+
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
+
 	//IrisDectH_GPU(SRC_2nd);
 	//ORBG_cgyt(SRC_2nd);
+
+	SURFG_cgyt(SRC_2nd, Temp_Buffer);
 
 /*	
 	Point3f center;
