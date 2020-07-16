@@ -13,7 +13,9 @@
 #pragma comment(lib,"ws2_32.lib")
 #include <winsock2.h>
 
-std::string LoadPath_Msi_12 = "F:\\Pictures\\Test For Programming\\Mat.type.png";  //用于测试的路径字符串
+//std::string LoadPath_Msi_12 = "F:\\Pictures\\Test For Programming\\DSC_15774-4.jpg";  //用于测试的路径字符串
+std::string LoadPath_Msi_12 = "F:\\Pictures\\Test For Programming\\DSC_0097.jpg";  //用于测试的路径字符串
+//std::string LoadPath_Msi_12 = "F:\\Pictures\\Test For Programming\\eye.jpg";  //用于测试的路径字符串
 
 std::string read_image(const std::string& image_path);
 
@@ -21,7 +23,6 @@ int send_image(SOCKET s, int &fd, std::string &image); //发送函数，不一�
 
 int main()
 {
-
 //WinsSock 初始化
 	WORD wVwesionRequested; //16bit字型变量 （WORD）
 	wVwesionRequested = MAKEWORD(2, 2);  //要求的库文件版本号，MAKEWORD宏将两个8bit上下拼成15bit，版本2.2
@@ -71,6 +72,12 @@ lpVendorInfo
 		return -4;
 	}
 
+//图片读取main函数配合代码
+	std::string ImgFile; //读取函数看起来是能用的 20200714读入通过，按理说都进来的应该也就是个对的东西
+	const std::string &path = LoadPath_Msi_12; //引用
+	ImgFile = read_image(path);
+	int tempx = 0;
+
 // Socket创建
 	SOCKET sClient;
 	sClient = socket(AF_INET, SOCK_STREAM, 0);
@@ -95,14 +102,9 @@ lpVendorInfo
 		return - 3;
 	}
 
-//图片读取main函数配合代码
-	std::string ImgFile; //读取函数看起来是能用的 20200714读入通过，按理说都进来的应该也就是个对的东西
-	const std::string &path = LoadPath_Msi_12; //引用
-	ImgFile = read_image(path);
-	int tempx = 0;
 //通过socket发送
 	send_image(sClient, tempx, ImgFile);
-	
+	closesocket(sClient);
 	return 0;
 }
 
@@ -110,7 +112,7 @@ lpVendorInfo
 std::string read_image(const std::string& image_path) 
 {
 	//图片文件打开
-	std::ifstream is(image_path.c_str(), std::ifstream::in);
+	std::ifstream is(image_path.c_str(), std::ifstream::in | std::ios::binary);
 	//图片长度计算
 	is.seekg(0, is.end);
 	int flength = is.tellg(); //长度值
@@ -133,7 +135,9 @@ int send_image(SOCKET s,int &fd, std::string &image) //此处的&似乎构造了
 	int response_length = body_length;
 	char* buffer = new char[response_length];
 	memcpy(buffer, body, body_length);
-	
+
+	Sleep(10); //我也不知道为啥，似乎是等一下就行，可能是因为内存拷贝有点慢？
+
 	//将响应写入缓冲区并发送 似乎是lnux的命令，看看MSVC 有什么对应的函数
 	int ret = 0; //= std::write(fd, buffer, response_length);
 	send(s,buffer,body_length,0);
