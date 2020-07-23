@@ -15,6 +15,8 @@ string LoadPath_Msi_1 = "F:\\Pictures\\Test For Programming\\eye.jpg";
 string LoadPath_Msi_2 = "F:\\Pictures\\Test For Programming\\DSC_15774.jpg";
 string LoadPath_Msi_3 = "F:\\Pictures\\Test For Programming\\DSC_15774-4.jpg";
 string LoadPath_Msi_4 = "F:\\Pictures\\Test For Programming\\天山天池拼.jpg";
+string LoadPath_Msi_5 = "F:\\Pictures\\Test For Programming\\xzf.jpg";  //人脸检测用图1
+string LoadPath_Msi_6 = "F:\\Pictures\\Test For Programming\\DSC_21516.jpg";  //人脸检测用图1
 
 /*-----------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -41,34 +43,27 @@ int main()
 {
 	std::vector<Mat> Temp_Array;
 	Mat Temp_Buffer;
-	//namedWindow(window_name, WINDOW_NORMAL);
-	namedWindow(window_name, WINDOW_AUTOSIZE);
+	namedWindow(window_name, WINDOW_NORMAL);
+	//namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_2, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_6, IMREAD_GRAYSCALE);
 	if (!SRC_2nd.data)
 	{
 		cout << "读取失败" << endl;
 		return -1;
 	}
-	Temp_Buffer = imread(LoadPath_Msi_3, IMREAD_GRAYSCALE); //此段读取代码直接删
-	if (!Temp_Buffer.data)
-	{
-		cout << "读取失败" << endl;
-		return -1;
-	}
-
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
-	imshow(window_name, Temp_Buffer);
-	waitKey(0);
+
+	FaceC_cgyt(SRC_2nd);  //此函数GPU版本报错 不可用不知道啥没实现 CPU可行
 
 	//IrisDectH_GPU(SRC_2nd);
 	//ORBG_cgyt(SRC_2nd);
 
-	SURFG_cgyt(SRC_2nd, Temp_Buffer);
+	//SURFG_cgyt(SRC_2nd, Temp_Buffer); //surf的GPU版本配合代码，20200723注释
 
-/*	
+	/*	
 	Point3f center;
 	center = IrisDect(Temp_Array[0],COUNTOUR);
 	cvtColor(SRC_2nd, Temp_Buffer, COLOR_GRAY2BGR);

@@ -73,6 +73,10 @@ Point3f IrisDectH_GPU(Mat Src);
 
 int ORBG_cgyt(Mat Src);
 
+int FaceG_cgyt(Mat Src); //使用的是HAAR的级联分类器 设定需输入灰度图像 20200723 啥函数没实现
+
+int FaceC_cgyt(Mat Src); //使用的是HAAR的级联分类器 CPU版本
+
 #endif // !Features2nd
 
 

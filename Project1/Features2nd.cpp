@@ -1,5 +1,7 @@
 #include "Func_Proj_2nd.h"
 
+#include <opencv2/objdetect/objdetect.hpp>  //对象检测的头文件
+
 string window_name_f1 = "Demo_Result"; //结果显示窗
 
 Mat FAST_dect_Cgyt(Mat Src1, Mat Src2)
@@ -342,4 +344,40 @@ vector<Point2f> subPix_pt(Mat Src) //启动时间20200305 仅是对角点的检测，无描述子
 	waitKey(0);
 
 	return Corners;
+}
+
+int FaceC_cgyt(Mat Src)
+{
+	CascadeClassifier FaceDect;
+	FaceDect.load("E:\\DIP\\OpencvPlus\\install\\etc\\haarcascades\\haarcascade_frontalface_alt2.xml");
+	Mat temp;
+	vector< Rect> Dected;
+	FaceDect.detectMultiScale(Src, Dected, 1.06, 3, 0 | CASCADE_SCALE_IMAGE,Size(200,200));
+
+	/*
+1. const Mat& image：输入图像
+2. vector& objects：输出的矩形向量组
+3. double scaleFactor=1.1：这个是每次缩小图像的比例，默认是1.1
+4. minNeighbors=3：匹配成功所需要的周围矩形框的数目（由于调整滑动窗口的大小和很多误报），每一个特征匹配到的区域都是一个矩形框，只有多个矩形框同时存在的时候，才认为是匹配成功，比如人脸，这个默认值是3。
+5. flags=0：可以取如下这些值：
+	CASCADE_DO_CANNY_PRUNING=1, 利用canny边缘检测来排除一些边缘很少或者很多的图像区域
+	CASCADE_SCALE_IMAGE=2, 正常比例检测
+	CASCADE_FIND_BIGGEST_OBJECT=4, 只检测最大的物体
+	CASCADE_DO_ROUGH_SEARCH=8 初略的检测
+6. minObjectSize maxObjectSize：匹配物体的大小范围 大小范围应该是最有效的限制
+	*/
+
+	if (Dected.empty())
+	{
+		printf("没找见脸\n");
+		return -2;
+	}
+	cvtColor(Src, temp, COLOR_GRAY2BGR);
+	for (int i = 0; i < Dected.size(); i++)
+	{
+		rectangle(temp, Dected[i], Scalar(0, 0, 255), 10);
+	}
+	imshow(window_name_f1, temp);
+	waitKey(0);
+	return 0;
 }

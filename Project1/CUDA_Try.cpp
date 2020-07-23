@@ -7,6 +7,8 @@
 #include <opencv2/xfeatures2d/cuda.hpp>
 #include <opencv2/cudaobjdetect.hpp>
 
+#include <opencv2/objdetect/objdetect.hpp> //haar级联分类器似乎要用
+
 string window_nameC = "Demo_Result";
 
 //此函数是部分CUDA功能的实现看看 20200705
@@ -138,6 +140,37 @@ int SURFG_cgyt(Mat Src1,Mat Src2)
 	Mat Map;
 	drawMatches(Src1,KPsC1,Src2,KPsC2,Selected_matchs,Map);
 	imshow(window_nameC, Map);
+	waitKey(0);
+	return 0;
+}
+
+
+//再来加点东西,似乎有个人脸识别啥的还挺好玩 有别人早好的轮子是真的方便快捷
+int FaceG_cgyt(Mat Src) //使用的是HAAR的级联分类器 设定需输入灰度图像
+{
+	cv::cuda::printCudaDeviceInfo(cv::cuda::getDevice());
+
+	Mat Temp = Src.clone();
+	
+	Ptr<cuda::CascadeClassifier> Cas_cgyt = cuda::CascadeClassifier::create("E:\\DIP\\OpencvPlus\\install\\etc\\lbpcascades\\lbpcascade_frontalface.xml");
+
+	cuda::GpuMat d_Buffer;
+	cuda::GpuMat d_Img;       //申请设备显存
+	d_Img.upload(Temp);       //拷贝图像至显存
+	Cas_cgyt->detectMultiScale(d_Img, d_Buffer);   //人脸检测
+	vector< Rect> Detected;
+	Cas_cgyt->convert(d_Buffer, Detected);   //画个框框把人脸框出来，gpu的检测结果放回主机内存
+	if (Detected.empty())
+	{
+		printf("没找见脸\n");
+		return 0;
+	}
+	cvtColor(Src, Temp, COLOR_GRAY2BGR);
+	for (int i = 0; i < Detected.size(); i++)
+	{
+		rectangle(Temp, Detected[i], Scalar(0, 0, 255), 2);
+	}
+	imshow(window_nameC, Temp);
 	waitKey(0);
 	return 0;
 }
