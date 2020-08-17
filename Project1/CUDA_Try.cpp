@@ -7,7 +7,10 @@
 #include <opencv2/xfeatures2d/cuda.hpp>
 #include <opencv2/cudaobjdetect.hpp>
 
-#include <opencv2/objdetect/objdetect.hpp> //haar级联分类器似乎要用
+#include <opencv2/objdetect/objdetect.hpp> //haar级联分类器似乎要用 基本实锤和那个编译失败的cudev库有关 似乎是因为架构不兼容 可能需要更高版本的opencv以适配cuda10
+
+//#include <opencv2/cudalegacy/NCVHaarObjectDetection.hpp>
+//#include <opencv2/cudalegacy.hpp>
 
 string window_nameC = "Demo_Result";
 
@@ -152,7 +155,7 @@ int FaceG_cgyt(Mat Src) //使用的是HAAR的级联分类器 设定需输入灰度图像
 
 	Mat Temp = Src.clone();
 	
-	Ptr<cuda::CascadeClassifier> Cas_cgyt = cuda::CascadeClassifier::create("E:\\DIP\\OpencvPlus\\install\\etc\\lbpcascades\\lbpcascade_frontalface.xml");
+	Ptr<cuda::CascadeClassifier> Cas_cgyt = cuda::CascadeClassifier::create("E:\\DIP\\OpencvPlus\\install\\etc\\haarcascades\\haarcascade_frontalface_alt2.xml");
 
 	cuda::GpuMat d_Buffer;
 	cuda::GpuMat d_Img;       //申请设备显存
@@ -174,3 +177,5 @@ int FaceG_cgyt(Mat Src) //使用的是HAAR的级联分类器 设定需输入灰度图像
 	waitKey(0);
 	return 0;
 }
+
+//如果要自己写图像处理程序，最简单的方法可能还是用CUDA项目构建了。图像处理核函数只能使用指针找数据，GpuMat好像不能用at,一定注意显存中的数据分布

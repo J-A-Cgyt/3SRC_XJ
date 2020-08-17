@@ -56,7 +56,7 @@ int main()
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
 
-	FaceC_cgyt(SRC_2nd);  //此函数GPU版本报错 不可用不知道啥没实现 CPU可行
+	FaceG_cgyt(SRC_2nd);  //此函数GPU版本报错 不可用不知道啥没实现 CPU可行
 
 	//IrisDectH_GPU(SRC_2nd);
 	//ORBG_cgyt(SRC_2nd);

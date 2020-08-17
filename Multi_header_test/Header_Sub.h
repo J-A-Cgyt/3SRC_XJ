@@ -83,8 +83,11 @@ private: //中间变量设定
 	cv::Mat end;  //最终结果
 	
 	std::vector<cv::Mat> Chanel_Queue; //各通道队列
+
 	cv::Mat Gard_angle;  //各种计算所得的梯度角度
+	
 	cv::Mat Sobel_Grad;  //sobel梯度结果，也作为所有成员函数的最终计算结果暂存,后续编写的程序也可直接用end
 };
 
 #endif // ! conv2nd
+
