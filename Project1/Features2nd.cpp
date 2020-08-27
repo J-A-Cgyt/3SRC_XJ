@@ -381,3 +381,33 @@ int FaceC_cgyt(Mat Src)
 	waitKey(0);
 	return 0;
 }
+
+int Components_Connected_cgyt(Mat Src)
+{
+	Mat Labels; //标签
+
+	int Num_Components = connectedComponents(Src, Labels);  //默认使用八连通域，Label数据类型CV_32S
+	if(Num_Components<2)
+	{
+		printf("未检测到对象\n");
+		return -1;
+	}
+	else
+	{
+		printf("共检测到%d个对象\n", Num_Components - 1);
+	}
+	//创建随机颜色的输出图像
+	Mat outPut = Mat::zeros(Src.rows, Src.cols, CV_8UC3);
+	//RNG seed(0xffffffff); //随机颜色种子
+	for (int i = 0; i < Num_Components - 1; i++)
+	{
+		Mat mask = Labels == i;
+		/*首先优先级 ==高于=，所以要先执行labels == i
+		labels是一个Mat（矩阵），i为int，其目的提取矩阵中与i值相同的点，然后放在mask中，这样的操作就会使mask中区域值为1，非区域值为0。
+		mask应是个二值矩阵*/
+		outPut.setTo(Scalar(-1), mask);
+	}
+	imshow(window_name_f1, outPut);
+	waitKey(0);
+	return 0;
+}

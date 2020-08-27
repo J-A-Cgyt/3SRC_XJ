@@ -67,7 +67,7 @@ private: //卷积核设定
 		-1, 0, 1,
 		-1, 0, 1);
 
-	//Laplace算子
+	//Laplace算子 四个方向
 	cv::Mat Laplace = (cv::Mat_<char>(3, 3) << -1, -1, -1,
 		-1, 8, -1,
 		-1, -1, -1);
