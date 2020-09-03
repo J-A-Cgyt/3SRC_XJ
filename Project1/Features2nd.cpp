@@ -398,14 +398,17 @@ int Components_Connected_cgyt(Mat Src)
 	}
 	//创建随机颜色的输出图像
 	Mat outPut = Mat::zeros(Src.rows, Src.cols, CV_8UC3);
-	//RNG seed(0xffffffff); //随机颜色种子
-	for (int i = 0; i < Num_Components - 1; i++)
+	RNG seed(time(0)); //随机颜色种子
+	for (int i = 1; i < Num_Components; i++) //i=0时的对象是背景
 	{
 		Mat mask = Labels == i;
 		/*首先优先级 ==高于=，所以要先执行labels == i
 		labels是一个Mat（矩阵），i为int，其目的提取矩阵中与i值相同的点，然后放在mask中，这样的操作就会使mask中区域值为1，非区域值为0。
 		mask应是个二值矩阵*/
-		outPut.setTo(Scalar(-1), mask);
+		int B = seed.uniform(0, 255);
+		int G = seed.uniform(0, 255);
+		int R = seed.uniform(0, 255);
+		outPut.setTo(Scalar(B,G,R), mask);
 	}
 	imshow(window_name_f1, outPut);
 	waitKey(0);

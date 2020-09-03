@@ -189,4 +189,57 @@ Mat FenShuiLing_CGYT(Mat Src)
 	return Img_mark;
 }
 
-//对各种函数的的trackBar参数试验在以下进行
+//对各种函数的的trackBar参数试验在以下进行 刚好callback函数也在这写呗,不过这并没有关联什么按键 估计是要有button什么的才有用
+void ShowHistoCallbcak(int state,Mat Src)
+{
+	if (Src.type() != CV_8UC1 || Src.type() != CV_8UC3)
+	{
+		printf("输入矩阵格式非常规");
+	}
+	//剖分通道
+	else if(Src.type() == CV_8UC3) //BGR
+	{	
+		vector< Mat> Channels;
+		split(Src, Channels);
+
+		int GrayLevels = 256;
+		float range[] = { 0,256 };
+		const float* histRange{ range };
+
+		//统计
+		Mat B_hist, G_hist, R_hist;
+		calcHist(&Channels[0], 1,0, Mat(), B_hist, 1, &GrayLevels, &histRange);
+		calcHist(&Channels[1], 1,0, Mat(), G_hist, 1, &GrayLevels, &histRange);
+		calcHist(&Channels[2], 1,0, Mat(), R_hist, 1, &GrayLevels, &histRange);
+
+		//画图
+		int width = 512;
+		int hight = 384;
+		Mat HistGram(hight, width, CV_8UC3, Scalar(20, 20, 20));
+
+		//归一化
+		normalize(B_hist, B_hist, 0, hight, NORM_MINMAX);
+		normalize(G_hist, G_hist, 0, hight, NORM_MINMAX);
+		normalize(R_hist, R_hist, 0, hight, NORM_MINMAX);
+
+		int binStep = cvRound((float)width / (float)GrayLevels);  //圆整
+		for (int i = 0; i < GrayLevels; i++)
+		{
+			line(HistGram,  //蓝色直方图
+				Point(binStep*(i-1),hight-cvRound(B_hist.at<float>(i-1))),
+				Point(binStep*(i),hight-cvRound(B_hist.at<float>(i))),
+				Scalar(255,0,0));
+			line(HistGram,  //绿色直方图
+				Point(binStep*(i - 1), hight - cvRound(G_hist.at<float>(i - 1))),
+				Point(binStep*(i), hight - cvRound(G_hist.at<float>(i))),
+				Scalar(0, 255, 0));
+			line(HistGram,  //红色直方图
+				Point(binStep*(i - 1), hight - cvRound(R_hist.at<float>(i - 1))),
+				Point(binStep*(i), hight - cvRound(R_hist.at<float>(i))),
+				Scalar(0, 0, 255));
+		}
+		imshow(window_name_f2, HistGram);
+		waitKey(0);
+	}
+
+}

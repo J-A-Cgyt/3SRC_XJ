@@ -148,7 +148,7 @@ int SURFG_cgyt(Mat Src1,Mat Src2)
 }
 
 
-//再来加点东西,似乎有个人脸识别啥的还挺好玩 有别人早好的轮子是真的方便快捷
+//再来加点东西,似乎有个人脸识别啥的还挺好玩 有别人早好的轮子是真的方便快捷 废，部分版本问题导致GPU版本级联分类器无法实例化
 int FaceG_cgyt(Mat Src) //使用的是HAAR的级联分类器 设定需输入灰度图像
 {
 	cv::cuda::printCudaDeviceInfo(cv::cuda::getDevice());
@@ -179,3 +179,43 @@ int FaceG_cgyt(Mat Src) //使用的是HAAR的级联分类器 设定需输入灰度图像
 }
 
 //如果要自己写图像处理程序，最简单的方法可能还是用CUDA项目构建了。图像处理核函数只能使用指针找数据，GpuMat好像不能用at,一定注意显存中的数据分布
+Mat CannyG_Cgyt(Mat Src)
+{
+	cuda::GpuMat d_edge, d_img;
+	Mat h_edge;
+	d_img.upload(Src);
+	Ptr<cuda::CannyEdgeDetector> Canny_edge = cuda::createCannyEdgeDetector(2.0, 100.0, 3, false); //创建GPU的Canny检测器并设定参数
+	Canny_edge->detect(d_img, d_edge);  //进行检测
+	d_edge.download(h_edge);
+	imshow(window_nameC, h_edge);
+	waitKey(0);
+	return h_edge;
+}
+
+int HoughLineG_Cgyt(Mat Src_edge) //输入图像应是CANNY的检测结果
+{
+	Mat hc_edge;
+	cvtColor(Src_edge, hc_edge, COLOR_GRAY2BGR);
+	cuda::GpuMat d_edge, d_lines;
+	d_edge.upload(Src_edge);
+	Ptr<cuda::HoughSegmentDetector> Hough = cuda::createHoughSegmentDetector(1.0f, (float)(CV_PI / 180.0f), 50, 5);
+	Hough->detect(d_edge, d_lines);
+
+	vector< Vec4i> Lines_info;
+	if (!d_lines.empty())
+	{
+		Lines_info.resize(d_lines.cols);
+		Mat h_lines(1, d_lines.cols, CV_32SC4, &Lines_info[0]);
+		d_lines.download(h_lines);   //此处为何不能直接下载，不能匹配Mat类型吗 CUDA+OPENCV PAGE141
+	}
+	for (size_t i = 0; i < Lines_info.size(); ++i)  //划线循环
+	{
+		Vec4i line_point = Lines_info[i];
+		line(hc_edge, Point(line_point[0], line_point[1]), 
+					   Point(line_point[2], line_point[3]), 
+			Scalar(0, 0, 255), 2, LINE_AA);
+	}
+	imshow(window_nameC, hc_edge);
+	waitKey(0);
+	return 0;
+}

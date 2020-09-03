@@ -77,6 +77,12 @@ int FaceG_cgyt(Mat Src); //使用的是HAAR的级联分类器 设定需输入灰度图像 20200723 
 
 int FaceC_cgyt(Mat Src); //使用的是HAAR的级联分类器 CPU版本
 
+int Components_Connected_cgyt(Mat Src);
+
+Mat CannyG_Cgyt(Mat Src); //GPU版本的Canny
+
+int HoughLineG_Cgyt(Mat Src_edge);
+
 #endif // !Features2nd
 
 
