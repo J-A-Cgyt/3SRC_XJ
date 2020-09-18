@@ -57,6 +57,10 @@ Mat FenShuiLing_CGYT(Mat Src);   //分水岭方法+区域随机颜色填充结果展示
 
 int Calib_Cgyt(Mat InputOutputArray);
 
+Mat MoHu_HuiDuBianHuan(Mat Src); //灰度变换的处理尝试-模糊方法的理解学习
+
+Mat MoHu_HuiDuBianHuan(Mat Src, int MT); //多线程版
+
 #endif // !Pre_Proc
 
 #ifndef Features2nd

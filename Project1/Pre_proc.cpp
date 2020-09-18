@@ -1,4 +1,5 @@
 #include "Func_Proj_2nd.h"
+#include <thread>
 
 string window_name_f2 = "Demo_Result"; //结果显示窗
 
@@ -242,4 +243,142 @@ void ShowHistoCallbcak(int state,Mat Src)
 		waitKey(0);
 	}
 
+}
+
+//至今为止，使用模糊集合的灰度变换应该是效果最好的直方图均化方法，看看MATLAB的代码试试能不能实现吧，为加速性能事实上可以使用查找表
+Vec3f Menbership_FuncI(uchar Input) //输入的隶属度函数uchar应该就能保证吧 范围必然在0-255范围
+{
+	float z0;
+	z0 = ((float)(Input + 1)) / 256.0;
+	float Ud, Ug, Ub;
+	
+	//分开写的话性能有点差，算了合并一下拿个记事本存一下吧	
+	if (z0 <= 0.3) //0-0.3
+	{
+		Ud = 1;	 //暗的隶属度函数 membership function of dark
+		Ug = 0;	 //灰的隶属度函数 membership function of gray
+		Ub = 0;	 //亮的隶属度函数 membership function of bright
+	}
+	else if (z0 > 0.3 & z0 <= 0.5)  //0.3-0.5
+	{
+		Ud = (-5.0)*(z0 - 0.5);
+		Ug = (5.0)*(z0 - 0.3);
+		Ub = 0;
+	}
+	else if (z0 > 0.5 & z0 <= 0.7)  //0.5-0.7
+	{
+		Ud = 0;
+		Ug = (-5.0)*(z0 - 0.7);
+		Ub = (5.0)*(z0 - 0.5);
+	}
+	else //0.7-1
+	{
+		Ud = 0;
+		Ug = 0;
+		Ub = 1;
+	}
+	Vec3f res;
+	res[0] = Ud;
+	res[1] = Ug;
+	res[2] = Ub;
+	
+	return res;
+}
+
+void MHHDBH_MT(Mat Src, Mat Res, int start, int end) //多线程执行函数 其实可执行的层级有高有低
+{
+	int cols = Src.cols;
+	Vec3f U;
+	uchar Input, v0;
+	float v0d;
+
+	for (int ROW = start; ROW < end; ROW++)
+	{
+		for (int COL = 0; COL < cols; COL++)
+		{
+			Input = Src.at<uchar>(ROW, COL);
+			U = Menbership_FuncI(Input);
+			v0d = (U[0] * 0.0 + U[1] * 127.0 + U[2] * 255) / (U[0] + U[1] + U[2]);
+			v0 = (unsigned char)v0d;
+			Res.at<uchar>(ROW, COL) = v0;
+		}
+	}
+}
+
+Mat MoHu_HuiDuBianHuan(Mat Src)  //算了写什么多线程 改造也就是多个函数的事情 多线程还是有必要的写八个 过两天直接CUDA
+{
+	if (Src.type() == CV_8UC1)
+	{
+		Mat Dst = Src.clone();
+		int cols = Src.cols; //列数
+		int rows = Src.rows; //行数
+		Vec3f U;
+		uchar Input, v0;
+		float v0d;
+
+		for (int ROW = 0; ROW < rows; ROW++)
+		{
+			for (int COL = 0; COL < cols; COL++)
+			{
+				Input = Src.at<uchar>(ROW, COL);
+				U = Menbership_FuncI(Input);
+				v0d = (U[0] * 0.0 + U[1] * 127.0 + U[2] * 255) / (U[0] + U[1] + U[2]);
+				v0 = (unsigned char)v0d;
+				Dst.at<uchar>(ROW, COL) = v0;
+			}
+		}
+
+		//imshow(window_name_f2, Dst);
+		//waitKey(0);
+
+		return Dst;
+	}
+	else
+	{
+		printf("必须是8bit单通道的灰度图像/n");
+		return Mat();
+	}
+}
+
+Mat MoHu_HuiDuBianHuan(Mat Src,int MT)
+{
+	const int NumOfThreads = 8;
+
+
+
+	if (MT == 1)
+	{
+		if (Src.type() == CV_8UC1)
+		{
+			Mat Dst = Src.clone();
+			int bound = Src.rows / NumOfThreads;
+			thread t1 = thread(MHHDBH_MT, Src, Dst,             0,     bound);
+			thread t2 = thread(MHHDBH_MT, Src, Dst,     bound, 2 * bound);
+			thread t3 = thread(MHHDBH_MT, Src, Dst, 2 * bound, 3 * bound);
+			thread t4 = thread(MHHDBH_MT, Src, Dst, 3 * bound, 4 * bound);
+			thread t5 = thread(MHHDBH_MT, Src, Dst, 4 * bound, 5 * bound);
+			thread t6 = thread(MHHDBH_MT, Src, Dst, 5 * bound, 6 * bound);
+			thread t7 = thread(MHHDBH_MT, Src, Dst, 6 * bound, 7 * bound);
+			thread t8 = thread(MHHDBH_MT, Src, Dst, 7 * bound,  Src.rows);
+
+			//线程同步
+			t1.join();	t2.join();	t3.join();	t4.join();
+			t5.join();	t6.join();	t7.join();	t8.join();
+
+			//imshow(window_name_f2, Dst);
+			//waitKey(0);
+
+			return Dst;
+		}
+		else
+		{
+			printf("必须是8bit单通道的灰度图像/n");
+			return Mat();
+		}
+	}
+	else
+	{
+		printf("启动数值错误，启动数值必须为1");
+		return Mat();
+	}
 }

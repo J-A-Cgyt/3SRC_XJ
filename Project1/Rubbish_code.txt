@@ -66,3 +66,50 @@ int main()
     return 0;
 }
 #endif
+
+	//分开写的话性能有点差，算了合并一下拿个记事本存一下吧
+	//暗的隶属度函数 membership function of dark
+	if (z0 <= 0.3)
+	{
+		Ud = 1;
+	}
+	else if (z0 > 0.5)
+	{
+		Ud = 0;
+	}
+	else
+	{
+		Ud = (5.0)*(z0 - 0.5);
+	}
+
+	//灰的隶属度函数 membership function of gray
+	if (z0 <= 0.3)
+	{
+		Ug = 0;
+	}
+	else if (z0 > 0.3 & z0 <= 0.5)
+	{
+		Ug = (-5.0)*(z0-0.7);
+	}
+	else if (z0 > 0.5 & z0 <= 0.7)
+	{
+		Ug = (5.0)*(z0 - 0.5);
+	}
+	else
+	{
+		Ug = 0;
+	}
+
+	//亮的隶属度函数 membership function of bright
+	if (z0 <= 0.5)
+	{
+		Ub = 0;
+	}
+	else if (z0 > 0.7)
+	{
+		Ub = 1;
+	}
+	else
+	{
+		Ub = (5.0)*(z0 - 0.5);
+	}
