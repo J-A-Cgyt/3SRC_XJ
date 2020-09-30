@@ -17,7 +17,7 @@ Mat Thershold_区域(Mat Src)
 }
 
 //再尝试一下傅里叶变换吧，没道理就这个函数用不了 启动20200323
-Mat FT_CGYT(Mat Src)
+Mat FT_CGYT(Mat Src,Mat &MiddleRes) //增加一个引用用于导出频域滤波的素材
 {
 	Mat temp = Src.clone();
 
@@ -28,7 +28,7 @@ Mat FT_CGYT(Mat Src)
 							  0, col_opt - Src.cols, 
 							  BORDER_CONSTANT, Scalar::all(0));
 
-	Mat FT_res = Mat(temp.size(), CV_32FC2); //图像尺寸设定存疑
+	Mat FT_res = Mat(temp.size(), CV_32FC2); //图像尺寸设定包含了扩展出去的边界，也就是获取了最合适的傅里叶变换尺寸
 	//Mat FT_res = Mat(temp.rows + row_opt, temp.cols + col_opt, CV_32FC2); //空矩阵 注意，此处矩阵尺寸并非重要参数，设定双通道float类型的数据即可
 	
 	Mat mForFourier[] = { Mat_<float>(temp),//源矩阵的浮点数化通道1 
@@ -38,7 +38,7 @@ Mat FT_CGYT(Mat Src)
 	Mat FT_src;
 	merge(mForFourier, 2, FT_src); //源矩阵通道合并
 
-	dft(FT_src, FT_res); //FT_res的两个通道分别为变换结果的实部和虚部
+	dft(FT_src, FT_res); //FT_res的两个通道分别为变换结果的实部和虚部 因未舍弃任何数据，所以这里的结果包含了幅值与相角，并未损失数据，根据此还原的结果应该也是完全一样的
 
 	vector<Mat> channels_res;
 	split(FT_res, channels_res);
@@ -90,6 +90,20 @@ Mat FT_CGYT(Mat Src)
 
 	return Location_rev; //因坐标轴变化需中心化后方可进行滤波操作，滤完以后再换回来（还是得看OpenCV自己的实现方法），频域滤波可以再写个类了
 }
+
+//现在过来再把频域滤波补上，滤波器模板看看如何生成 这应该是主要的，对应点位相乘的操作到也还行，就是像素多了就考虑用GPU实现把，听说CUDA集成了FFT？
+Mat Filter_Freq(Mat Src,unsigned char FilterType) //频域滤波的尝试 滤波器的生成其实应该类似卷积，有一套
+{
+	Mat SuCai;
+	Mat FreqPu = FT_CGYT(Src, SuCai);
+
+	Mat Filter;//纯实数的滤镜
+	Filter.zeros(Src.rows,Src.cols,CV_32FC1);
+	//要确定怎样的变换结果可以进行相乘滤波，改造傅里叶函数使其能接收引用吧
+	//idft
+	return Mat(); //无好的结果返回
+}
+
 
 //在此处借用有一下地方，先写个直线段检测的函数在此
 vector<Vec4f> LSD_cgyt(Mat Src)
@@ -243,6 +257,33 @@ void ShowHistoCallbcak(int state,Mat Src)
 		waitKey(0);
 	}
 
+}
+//增加一个直方图的计算函数，这东西我似乎写过又似乎没写过
+void HistogramCGYT(Mat Src)
+{
+	//Mat Hist;
+	int Histsize = 256;
+	float range[] = { 0,255 };
+	const float* histRange = range;
+	Mat Hist_gray;
+	calcHist(&Src, 1, 0, Mat(), Hist_gray, 1, &Histsize, &histRange);  //统计的结果是一个一维的序列，没办法用图显示，需要对统计数据进行归一化
+
+	//cout << Hist_gray;
+	int width_hist = 512;
+	int height_hist = 400;
+	int bin_width = width_hist / Histsize;
+	Mat HistGram = Mat(height_hist, width_hist, CV_8UC3, Scalar(0, 0, 0));
+	normalize(Hist_gray, Hist_gray, 0, height_hist, NORM_MINMAX, -1, Mat());  //归一化
+	for (int i = 1; i < Histsize; i++)
+	{
+		line(HistGram, Point((i - 1)*bin_width, height_hist - cvRound(Hist_gray.at<float>(i - 1)))
+			,Point(i*bin_width, height_hist - cvRound(Hist_gray.at<float>(i))),
+			Scalar(255, 255, 255), 1, LINE_AA); //注意图像的坐标y轴向下为正，故此要减去高
+		//cout << Point((i - 1)*bin_width, height_hist - cvRound(Hist_gray.at<float>(i - 1))) << ";";
+		//cout << Point(i*bin_width, height_hist - cvRound(Hist_gray.at<float>(i))) << endl;
+	}	
+	imshow(window_name_f2, HistGram);
+	waitKey(0);
 }
 
 //至今为止，使用模糊集合的灰度变换应该是效果最好的直方图均化方法，看看MATLAB的代码试试能不能实现吧，为加速性能事实上可以使用查找表

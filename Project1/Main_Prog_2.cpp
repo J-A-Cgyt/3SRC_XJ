@@ -12,6 +12,7 @@ string Load_Path_2nd_7 = "G:\\Pictures\\Test For Programming\\003.1.jpg"; // sub
 string Load_Path_2nd_8 = "G:\\Pictures\\Test For Programming\\eye.jpg"; // subPixel_Contours detect by Moments
 
 /*--------------------------------------------台式机MSI 所用路径---------------------------------------------------------------------*/
+string LoadPath_Msi_0 = "F:\\Pictures\\Test For Programming\\DSC_8967.jpg";
 string LoadPath_Msi_1 = "F:\\Pictures\\Test For Programming\\eye.jpg";
 string LoadPath_Msi_2 = "F:\\Pictures\\Test For Programming\\DSC_15774.jpg";
 string LoadPath_Msi_3 = "F:\\Pictures\\Test For Programming\\DSC_15774-4.jpg";
@@ -21,6 +22,7 @@ string LoadPath_Msi_6 = "F:\\Pictures\\Test For Programming\\DSC_21516.jpg";  //
 string LoadPath_Msi_7 = "F:\\Pictures\\Test For Programming\\憨.png";  //连通域检测用途
 string LoadPath_Msi_8 = "F:\\Pictures\\Test For Programming\\pai.png";  
 string LoadPath_Msi_9 = "F:\\Pictures\\Test For Programming\\gpgpu.png";  
+string LoadPath_Msi_A = "F:\\Pictures\\Test For Programming\\噪声测试图像.png";  
 
 /*-----------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -28,7 +30,7 @@ string window_name = "Demo_Result"; //结果显示窗
 
 Mat SRC_2nd; //全局源图
 Mat DST_2nd; //全局输出图
-clock_t Start, End;
+//clock_t Start, End;
 
 
 //关于自制卷积函数的枚举类型说明
@@ -53,7 +55,7 @@ int main()
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_3, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_A, IMREAD_GRAYSCALE);
 	if (!SRC_2nd.data)
 	{
 		cout << "读取失败" << endl;
@@ -62,20 +64,24 @@ int main()
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
 
-	Start = clock();
+	//HistogramCGYT(SRC_2nd);
+	FT_CGYT(SRC_2nd, Temp_Buffer);
+
+	//Start = clock();
 	//单线程版本
-	DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd);
-	End = clock();
+	//DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd);
+	//End = clock();
 
 	//多线程版本
 	//DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd,1);
 	//End = clock();
 
-	double endtime = (double)(End - Start) / CLOCKS_PER_SEC;
-	printf("Total time: %f ms \n", endtime * 1000);	//ms为单位
+	//double endtime = (double)(End - Start) / CLOCKS_PER_SEC;
+	//printf("Total time: %f ms \n", endtime * 1000);	//ms为单位
 	
-	imshow(window_name, DST_2nd);
-	waitKey(0);
+	//imshow(window_name, DST_2nd);
+	//waitKey(0);
+
 	//Temp_Buffer = CannyG_Cgyt(SRC_2nd);
 	//HoughLineG_Cgyt(Temp_Buffer);
 	//threshold(SRC_2nd, Temp_Buffer, 200, 255, THRESH_BINARY);

@@ -47,7 +47,9 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int 
 
 Mat Thershold_区域(Mat Src); //区域阈值
 
-Mat FT_CGYT(Mat Src); //傅里叶变换
+Mat FT_CGYT(Mat Src,Mat &MiddleRes); //傅里叶变换
+
+Mat Filter_Freq(Mat Src, unsigned char FilterType); //频域滤波的尝试 滤波器的生成其实应该类似卷积，有一套
 
 Mat Conv_Cgyt(Mat Src,int K_mod); //图像灰度梯度计算 源文件Cgyt_conv.cpp
 
@@ -104,6 +106,12 @@ Mat WaveLetHarrR_CGYT(Mat Src, int LevelCount);//小波分解结果合并
 
 Mat GPU_func_study(Mat Src1, Mat Src2);
 
-int SURFG_cgyt(Mat Src1, Mat Src2);
+int SURFG_cgyt(Mat Src1, Mat Src2);  //SURF的GPU版本，现在这个专利保护期已过，可以随便用了
 
 #endif // !buffer
+
+#ifndef Calc
+
+void HistogramCGYT(Mat Src);
+
+#endif // !Calc 
