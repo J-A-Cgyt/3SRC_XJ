@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Func_Proj_2nd.h" />
+    <ClInclude Include="MathCgyt.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Rubbish_code.txt" />

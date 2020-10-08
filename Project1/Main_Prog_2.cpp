@@ -51,8 +51,8 @@ int main()
 {
 	std::vector<Mat> Temp_Array;
 	Mat Temp_Buffer;
-	namedWindow(window_name, WINDOW_KEEPRATIO);
-	//namedWindow(window_name, WINDOW_AUTOSIZE);
+	//namedWindow(window_name, WINDOW_KEEPRATIO);
+	namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
 	SRC_2nd = imread(LoadPath_Msi_A, IMREAD_GRAYSCALE);
@@ -66,6 +66,7 @@ int main()
 
 	//HistogramCGYT(SRC_2nd);
 	FT_CGYT(SRC_2nd, Temp_Buffer);
+	Filter_Freq(Temp_Buffer,1);
 
 	//Start = clock();
 	//单线程版本

@@ -19,6 +19,7 @@
 #include <opencv2/xfeatures2d.hpp>
 
 //#include "D:/编程/OpenCV/opencv_contrib-4.0.0/modules/xfeatures2d/include/opencv2/xfeatures2d.hpp"
+//#define buffer
 
 using namespace std;
 using namespace cv;
@@ -115,3 +116,7 @@ int SURFG_cgyt(Mat Src1, Mat Src2);  //SURF的GPU版本，现在这个专利保护期已过，可
 void HistogramCGYT(Mat Src);
 
 #endif // !Calc 
+
+//新写一个文件用来放纯数学的方法，已经写进去的什么迭代求解方程啊就不挪了
+//#define MathActivate
+#include "MathCgyt.h"

@@ -39,6 +39,7 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //增加一个引用用于导出频域滤波的素材
 	merge(mForFourier, 2, FT_src); //源矩阵通道合并
 
 	dft(FT_src, FT_res); //FT_res的两个通道分别为变换结果的实部和虚部 因未舍弃任何数据，所以这里的结果包含了幅值与相角，并未损失数据，根据此还原的结果应该也是完全一样的
+	MiddleRes = FT_res.clone(); //包含实部与虚部Mat 通道为CV_32FC2 注意，此处的图像并未重合中心原点
 
 	vector<Mat> channels_res;
 	split(FT_res, channels_res);
@@ -75,7 +76,7 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //增加一个引用用于导出频域滤波的素材
 		waitKey(0);
 	}
 
-	copyMakeBorder(PartQ[0], PartQ[0], row_opt / 2, 0, col_opt / 2, 0, BORDER_CONSTANT, 0);
+	copyMakeBorder(PartQ[0], PartQ[0], row_opt / 2, 0, col_opt / 2, 0, BORDER_CONSTANT, 0);   //局部扩展*4
 	copyMakeBorder(PartQ[2], PartQ[2], 0, row_opt / 2, col_opt / 2, 0, BORDER_CONSTANT, 0);
 	copyMakeBorder(PartQ[1], PartQ[1], row_opt / 2, 0, 0, col_opt / 2, BORDER_CONSTANT, 0);
 	copyMakeBorder(PartQ[3], PartQ[3], 0, row_opt / 2, 0, col_opt / 2, BORDER_CONSTANT, 0);
@@ -89,21 +90,51 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //增加一个引用用于导出频域滤波的素材
 	//mAmplitude.copyTo(Location_rev );
 
 	return Location_rev; //因坐标轴变化需中心化后方可进行滤波操作，滤完以后再换回来（还是得看OpenCV自己的实现方法），频域滤波可以再写个类了
+	//幅值图并未代表全部信息，若要进行频域滤波，则建议对实部和虚部同时滤波，按理说保证相角不变（零相移）的滤波器应是一个纯实数矩阵
 }
 
 //现在过来再把频域滤波补上，滤波器模板看看如何生成 这应该是主要的，对应点位相乘的操作到也还行，就是像素多了就考虑用GPU实现把，听说CUDA集成了FFT？
 Mat Filter_Freq(Mat Src,unsigned char FilterType) //频域滤波的尝试 滤波器的生成其实应该类似卷积，有一套
 {
 	Mat SuCai;
-	Mat FreqPu = FT_CGYT(Src, SuCai);
+	if (Src.type() != CV_32FC2) {
+		Mat FreqPu = FT_CGYT(Src, SuCai);
+	}
+	else
+	{
+		SuCai = Src.clone();
+	}
+	//还需要对图像进行中心重合的操作
+	int width = Src.cols;
+	int height = Src.rows;
 
-	Mat Filter;//纯实数的滤镜
-	Filter.zeros(Src.rows,Src.cols,CV_32FC1);
+
+	Mat Filter;//纯实数的滤镜，滤波器的构造还是比较麻烦的，按照中心为原点按说填充四分之一的画面元素再镜像2次应该就可了
+	Filter = Filter.zeros(Src.rows,Src.cols,CV_32FC1);
+	if (FilterType == 1)  //高斯模糊滤镜，高斯频域图像
+	{
+		float Sigma = 100.0; //可以认为是高斯函数的半径（凸起部分
+		float D0 = 2 * Sigma * Sigma;
+		for (int i = 0; i < Src.rows; i++) //算法写的越多，越不喜欢二重循环
+		{
+			for (int j = 0; j < Src.cols; j++)
+			{
+				float d = pow(i - Src.rows / 2, 2) + pow(j - Src.cols / 2, 2); //pow()为指数函数，pow(底,指)
+				//Filter.at<Vec2f>(i, j) = Vec2f(expf(-d/D0), expf(-d / D0));
+				Filter.at<float>(i, j) = expf(-d / D0);
+			}
+		}
+	}
+	//multiply(Src,Filter,SuCai);
+	normalize(Filter, Filter, 0, 255, NORM_MINMAX);
+	Filter.convertTo(Filter, CV_8UC1);
+	//printf("%d",Filter.at<uchar>(450, 450));
+	imshow(window_name_f2, Filter);
+	waitKey(0);
 	//要确定怎样的变换结果可以进行相乘滤波，改造傅里叶函数使其能接收引用吧
 	//idft
 	return Mat(); //无好的结果返回
 }
-
 
 //在此处借用有一下地方，先写个直线段检测的函数在此
 vector<Vec4f> LSD_cgyt(Mat Src)
@@ -300,13 +331,13 @@ Vec3f Menbership_FuncI(uchar Input) //输入的隶属度函数uchar应该就能保证吧 范围必
 		Ug = 0;	 //灰的隶属度函数 membership function of gray
 		Ub = 0;	 //亮的隶属度函数 membership function of bright
 	}
-	else if (z0 > 0.3 & z0 <= 0.5)  //0.3-0.5
+	else if ((z0 > 0.3) & (z0 <= 0.5))  //0.3-0.5
 	{
 		Ud = (-5.0)*(z0 - 0.5);
 		Ug = (5.0)*(z0 - 0.3);
 		Ub = 0;
 	}
-	else if (z0 > 0.5 & z0 <= 0.7)  //0.5-0.7
+	else if ((z0 > 0.5) & (z0 <= 0.7))  //0.5-0.7
 	{
 		Ud = 0;
 		Ug = (-5.0)*(z0 - 0.7);
