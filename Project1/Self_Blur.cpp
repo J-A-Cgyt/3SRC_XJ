@@ -85,7 +85,7 @@ Mat Anisotropic_Cgyt(Mat Src, double K, double Lamda, int Iter) //Ğ§¹û´æÒÉ ËÆºõÓ
 	}
 	else
 	{
-		cout << "Type Error: Type of matrix must be CV_8UC3 or CV_*UC1" << endl;
+		cout << "Type Error: Type of matrix must be CV_8UC3 or CV_8UC1" << endl;
 		return Mat();
 	}
 	if (Iter < 1)
@@ -335,7 +335,6 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> contour)
 		Contour_subPix.push_back(Point2d(3.5 * Rho[i] * cos(Theta[i]) + contour[i].x, 
 										 3.5 * Rho[i] * sin(Theta[i]) + contour[i].y));
 	}
-
 
 	return Contour_subPix;  
 	/*µÚÒ»¸öÑÇÏñËØ±ßÔµ¼ì²â³ÌĞò£¨»Ò¶È¾Ø£© 20200302ÔËĞĞÍ¨¹ı£¬ÒòÈ±ÉÙÁíÍâÔ­ÀíµÄ¸ß¾«¶È²âÁ¿ÊÖ¶Î£¬

@@ -23,6 +23,7 @@ string LoadPath_Msi_7 = "F:\\Pictures\\Test For Programming\\∫©.png";  //¡¨Õ®”Úº
 string LoadPath_Msi_8 = "F:\\Pictures\\Test For Programming\\pai.png";  
 string LoadPath_Msi_9 = "F:\\Pictures\\Test For Programming\\gpgpu.png";  
 string LoadPath_Msi_A = "F:\\Pictures\\Test For Programming\\‘Î…˘≤‚ ‘ÕºœÒ.png";  
+string LoadPath_Msi_B = "F:\\Pictures\\Test For Programming\\FreqFilterSrc.png";  
 
 /*-----------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -55,7 +56,7 @@ int main()
 	namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//‘≠ ºÕºœÒ◊È∂¡»°	
-	SRC_2nd = imread(LoadPath_Msi_A, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_B, IMREAD_GRAYSCALE);
 	if (!SRC_2nd.data)
 	{
 		cout << "∂¡»° ß∞‹" << endl;
@@ -66,19 +67,9 @@ int main()
 
 	//HistogramCGYT(SRC_2nd);
 	FT_CGYT(SRC_2nd, Temp_Buffer);
-	Filter_Freq(Temp_Buffer,1);
+	Filter_Freq(Temp_Buffer,2);
 
-	//Start = clock();
-	//µ•œﬂ≥Ã∞Ê±æ
-	//DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd);
-	//End = clock();
 
-	//∂‡œﬂ≥Ã∞Ê±æ
-	//DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd,1);
-	//End = clock();
-
-	//double endtime = (double)(End - Start) / CLOCKS_PER_SEC;
-	//printf("Total time: %f ms \n", endtime * 1000);	//msŒ™µ•Œª
 	
 	//imshow(window_name, DST_2nd);
 	//waitKey(0);

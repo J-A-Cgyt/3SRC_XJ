@@ -127,7 +127,7 @@ std::string read_image(const std::string& image_path)
 }
 
 //此函数不一定使用
-int send_image(SOCKET s,int &fd, std::string &image) //此处的&似乎构造了引用？
+int send_image(SOCKET s,int &fd, std::string &image) //此处的&似乎构造了引用？-问题解决，就是引用传递，复制地址不产生新的局部变量
 {
 	//创建响应
 	int body_length = image.size();

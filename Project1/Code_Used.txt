@@ -141,3 +141,16 @@ GPU初次测试，图像加减的配合代码  20200706转移
 	waitKey(0);
 	Temp_Array.push_back(Temp_Buffer);
 	GPU_func_study(Temp_Array[0], Temp_Array[1]);
+
+模糊变换计时 20201008转移
+	//Start = clock();
+	//单线程版本
+	//DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd);
+	//End = clock();
+
+	//多线程版本
+	//DST_2nd = MoHu_HuiDuBianHuan(SRC_2nd,1);
+	//End = clock();
+
+	//double endtime = (double)(End - Start) / CLOCKS_PER_SEC;
+	//printf("Total time: %f ms \n", endtime * 1000);	//ms为单位

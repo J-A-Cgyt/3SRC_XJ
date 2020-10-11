@@ -1,6 +1,8 @@
 #include "Func_Proj_2nd.h"
 #include <thread>
 
+#define ViewFilter 1 //ÓÃÓÚÆô¶¯¹Ø±ÕÆµÓòÂË²¨ÂË¾µÏÔÊ¾µÄºê¿ª¹Ø
+
 string window_name_f2 = "Demo_Result"; //½á¹ûÏÔÊ¾´°
 
 Mat Thershold_ÇøÓò(Mat Src)
@@ -39,7 +41,7 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //Ôö¼ÓÒ»¸öÒıÓÃÓÃÓÚµ¼³öÆµÓòÂË²¨µÄËØ²Ä
 	merge(mForFourier, 2, FT_src); //Ô´¾ØÕóÍ¨µÀºÏ²¢
 
 	dft(FT_src, FT_res); //FT_resµÄÁ½¸öÍ¨µÀ·Ö±ğÎª±ä»»½á¹ûµÄÊµ²¿ºÍĞé²¿ ÒòÎ´ÉáÆúÈÎºÎÊı¾İ£¬ËùÒÔÕâÀïµÄ½á¹û°üº¬ÁË·ùÖµÓëÏà½Ç£¬²¢Î´ËğÊ§Êı¾İ£¬¸ù¾İ´Ë»¹Ô­µÄ½á¹ûÓ¦¸ÃÒ²ÊÇÍêÈ«Ò»ÑùµÄ
-	MiddleRes = FT_res.clone(); //°üº¬Êµ²¿ÓëĞé²¿Mat Í¨µÀÎªCV_32FC2 ×¢Òâ£¬´Ë´¦µÄÍ¼Ïñ²¢Î´ÖØºÏÖĞĞÄÔ­µã
+	MiddleRes = FT_res.clone(); //°üº¬Êµ²¿ÓëĞé²¿Mat Í¨µÀÎªCV_32FC2 ×¢Òâ£¬´Ë´¦µÄÍ¼Ïñ²¢Î´ÖØºÏÖĞĞÄÔ­µã£¨ÖĞĞÄ»¯£©
 
 	vector<Mat> channels_res;
 	split(FT_res, channels_res);
@@ -72,8 +74,8 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //Ôö¼ÓÒ»¸öÒıÓÃÓÃÓÚµ¼³öÆµÓòÂË²¨µÄËØ²Ä
 	for (int i = 0; i < 4; i++)
 	{
 		PartQ[i] = mAmplitude(Achor_cgyt[i]);
-		imshow(window_name_f2, PartQ[i]);
-		waitKey(0);
+		//imshow(window_name_f2, PartQ[i]);
+		//waitKey(0);
 	}
 
 	copyMakeBorder(PartQ[0], PartQ[0], row_opt / 2, 0, col_opt / 2, 0, BORDER_CONSTANT, 0);   //¾Ö²¿À©Õ¹*4
@@ -104,16 +106,46 @@ Mat Filter_Freq(Mat Src,unsigned char FilterType) //ÆµÓòÂË²¨µÄ³¢ÊÔ ÂË²¨Æ÷µÄÉú³ÉÆ
 	{
 		SuCai = Src.clone();
 	}
-	//»¹ĞèÒª¶ÔÍ¼Ïñ½øĞĞÖĞĞÄÖØºÏµÄ²Ù×÷
-	int width = Src.cols;
-	int height = Src.rows;
+//»¹ĞèÒª¶ÔÍ¼Ïñ½øĞĞÖĞĞÄÖØºÏµÄ²Ù×÷
+	const int Re = 0; const int Im = 1;
+	int width = Src.cols;  int cx = width / 2;
+	int height = Src.rows; int cy = height / 2;
+	Mat Channels[] = { Mat::zeros(SuCai.size(),CV_32FC1),Mat::zeros(SuCai.size(),CV_32FC1) };
+	split(SuCai,Channels); //²ğ·ÖÍ¨µÀ
+	//Êµ²¿»»Î»
+	Mat Part1r(Channels[Re], Rect( 0,  0, cx, cy));
+	Mat Part2r(Channels[Re], Rect(cx,  0, cx, cy));
+	Mat Part3r(Channels[Re], Rect( 0, cy, cx, cy));
+	Mat Part4r(Channels[Re], Rect(cx, cy, cx, cy));  //¿½±´¾Ö²¿ copyµÄ²Ù×÷ËÆºõÁª¶¯ÁËÔ­Ê¼Í¼Ïñ£¿
+	Mat Temp;
 
+	Part1r.copyTo(Temp);
+	Part4r.copyTo(Part1r);
+	Temp.copyTo(Part4r);  //×óÉÏÓÒÏÂ»»Î»
+	
+	Part2r.copyTo(Temp);
+	Part3r.copyTo(Part2r);
+	Temp.copyTo(Part3r);  //ÓÒÏÂ×óÉÏ»»Î»
+
+	//Ğé²¿»»Î»
+	Mat Part1i(Channels[Im], Rect(0, 0, cx, cy));
+	Mat Part2i(Channels[Im], Rect(cx, 0, cx, cy));
+	Mat Part3i(Channels[Im], Rect(0, cy, cx, cy));
+	Mat Part4i(Channels[Im], Rect(cx, cy, cx, cy));  //¿½±´¾Ö²¿
+
+	Part1i.copyTo(Temp);
+	Part4i.copyTo(Part1i);
+	Temp.copyTo(Part4i);  //×óÉÏÓÒÏÂ»»Î»
+
+	Part2i.copyTo(Temp);
+	Part3i.copyTo(Part2i);
+	Temp.copyTo(Part3i);  //ÓÒÏÂ×óÉÏ»»Î»
 
 	Mat Filter;//´¿ÊµÊıµÄÂË¾µ£¬ÂË²¨Æ÷µÄ¹¹Ôì»¹ÊÇ±È½ÏÂé·³µÄ£¬°´ÕÕÖĞĞÄÎªÔ­µã°´ËµÌî³äËÄ·ÖÖ®Ò»µÄ»­ÃæÔªËØÔÙ¾µÏñ2´ÎÓ¦¸Ã¾Í¿ÉÁË
 	Filter = Filter.zeros(Src.rows,Src.cols,CV_32FC1);
-	if (FilterType == 1)  //¸ßË¹Ä£ºıÂË¾µ£¬¸ßË¹ÆµÓòÍ¼Ïñ
+	if (FilterType == 1)  //¸ßË¹Ä£ºıÂË¾µ£¬¸ßË¹ÆµÓòÍ¼Ïñ 20201008¸ßË¹ÂË²¨Æ÷²âÊÔÍ¨¹ı ×ß¹ıÁËÕâ¸öÁ÷³Ì£¬Ê£ÏÂµÄ¾ÍÊÇÂË²¨Æ÷¹¹ÔìµÄÎÊÌâ
 	{
-		float Sigma = 100.0; //¿ÉÒÔÈÏÎªÊÇ¸ßË¹º¯ÊıµÄ°ë¾¶£¨Í¹Æğ²¿·Ö
+		float Sigma = 10.0; //¿ÉÒÔÈÏÎªÊÇ¸ßË¹º¯ÊıµÄ°ë¾¶£¨Í¹Æğ²¿·Ö
 		float D0 = 2 * Sigma * Sigma;
 		for (int i = 0; i < Src.rows; i++) //Ëã·¨Ğ´µÄÔ½¶à£¬Ô½²»Ï²»¶¶şÖØÑ­»·
 		{
@@ -125,15 +157,52 @@ Mat Filter_Freq(Mat Src,unsigned char FilterType) //ÆµÓòÂË²¨µÄ³¢ÊÔ ÂË²¨Æ÷µÄÉú³ÉÆ
 			}
 		}
 	}
-	//multiply(Src,Filter,SuCai);
+	if (FilterType == 2)  //ÀíÏëµÍÍ¨ÂË²¨Æ÷
+	{
+		float Radius = 100;
+		for (int i = 0; i < Filter.rows; i++)
+		{
+			for (int j = 0; j < Filter.cols; j++)
+			{
+				float d = pow(i - Src.rows / 2, 2) + pow(j - Src.cols / 2, 2);
+				float Radius2 = pow(Radius, 2);
+				if (d > Radius2)
+				{
+					Filter.at<float>(i, j) = 0.0;
+				}
+				else
+				{
+					Filter.at<float>(i, j) = 1.0;
+				}
+			}
+		}
+	}
+	Mat res[] = { Mat::zeros(SuCai.size(),CV_32FC1),Mat::zeros(SuCai.size(),CV_32FC1) };
+	multiply(Channels[Re], Filter, res[Re]);
+	multiply(Channels[Im], Filter, res[Im]);
+	Mat ResMerged;
+	merge(res, 2, ResMerged);
+
+#if ViewFilter == 0
+//ÂË¾µÏÔÊ¾
 	normalize(Filter, Filter, 0, 255, NORM_MINMAX);
 	Filter.convertTo(Filter, CV_8UC1);
-	//printf("%d",Filter.at<uchar>(450, 450));
+	printf("%d",Filter.at<uchar>(450, 450));
 	imshow(window_name_f2, Filter);
 	waitKey(0);
+#endif // DEBUG
+
+	idft(ResMerged, ResMerged);                       //·´±ä»»,½á¹ûÎª¸´Êı
+	split(ResMerged, res);                            //²ğ·ÖÍ¨µÀ
+	magnitude(res[Re], res[Im], res[0]);              //Çó·ùÖµ
+	normalize(res[Re], res[Re], 0, 255, NORM_MINMAX); //¹éÒ»»¯
+	res[Re].convertTo(res[Re], CV_8UC1);              //Í¼ÏñÀàĞÍ×ª»»
+	imshow(window_name_f2, res[Re]);
+	waitKey(0);
 	//ÒªÈ·¶¨ÔõÑùµÄ±ä»»½á¹û¿ÉÒÔ½øĞĞÏà³ËÂË²¨£¬¸ÄÔì¸µÀïÒ¶º¯ÊıÊ¹ÆäÄÜ½ÓÊÕÒıÓÃ°É
-	//idft
-	return Mat(); //ÎŞºÃµÄ½á¹û·µ»Ø
+	return res[Re];
+
+	//return Mat(); //ÎŞºÃµÄ½á¹û·µ»Ø
 }
 
 //ÔÚ´Ë´¦½èÓÃÓĞÒ»ÏÂµØ·½£¬ÏÈĞ´¸öÖ±Ïß¶Î¼ì²âµÄº¯ÊıÔÚ´Ë
