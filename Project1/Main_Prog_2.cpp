@@ -56,7 +56,7 @@ int main()
 	namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_B, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_B, IMREAD_GRAYSCALE); cout << SRC_2nd.type();
 	if (!SRC_2nd.data)
 	{
 		cout << "读取失败" << endl;
@@ -66,10 +66,12 @@ int main()
 	waitKey(0);
 
 	//HistogramCGYT(SRC_2nd);
-	FT_CGYT(SRC_2nd, Temp_Buffer);
-	Filter_Freq(Temp_Buffer,2);
+	//FT_CGYT(SRC_2nd, Temp_Buffer);
+	//Filter_Freq(Temp_Buffer,4);
 
-
+	Temp_Buffer = HarmonicMeanFilter(SRC_2nd, 2,1,1);
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
 	
 	//imshow(window_name, DST_2nd);
 	//waitKey(0);

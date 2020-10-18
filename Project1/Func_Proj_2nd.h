@@ -26,6 +26,10 @@ using namespace cv;
 
 #ifndef Self_Blur //自行建立的滤波方法
 
+Mat GeoMeanFilter(Mat Src, int size); //几何均值滤波器 20201014
+
+Mat HarmonicMeanFilter(Mat Src, int size, double n, int Flag); //谐波均值滤波器 20201014
+
 Mat Gaosi_双边(Mat Src); //高斯双边滤波与锐化，保持边缘的滤波 2019/11/14,从测试与积累项目移植
 
 Mat NLM_CGYT(Mat Src); //NLM，非局部均值滤波
@@ -118,6 +122,6 @@ void HistogramCGYT(Mat Src);
 #endif // !Calc 
 
 //新写一个文件用来放纯数学的方法，已经写进去的什么迭代求解方程啊就不挪了
-#define MathActivate 0  //数学方法是否启用的宏定义 1-启用 2-不启用
+#define MathActivate 1  //数学方法是否启用的宏定义 1-启用 2-不启用
 
 #include "MathCgyt.h"

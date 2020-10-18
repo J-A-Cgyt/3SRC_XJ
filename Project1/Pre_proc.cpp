@@ -143,7 +143,9 @@ Mat Filter_Freq(Mat Src,unsigned char FilterType) //ÆµÓòÂË²¨µÄ³¢ÊÔ ÂË²¨Æ÷µÄÉú³ÉÆ
 
 	Mat Filter;//´¿ÊµÊıµÄÂË¾µ£¬ÂË²¨Æ÷µÄ¹¹Ôì»¹ÊÇ±È½ÏÂé·³µÄ£¬°´ÕÕÖĞĞÄÎªÔ­µã°´ËµÌî³äËÄ·ÖÖ®Ò»µÄ»­ÃæÔªËØÔÙ¾µÏñ2´ÎÓ¦¸Ã¾Í¿ÉÁË
 	Filter = Filter.zeros(Src.rows,Src.cols,CV_32FC1);
-	if (FilterType == 1)  //¸ßË¹Ä£ºıÂË¾µ£¬¸ßË¹ÆµÓòÍ¼Ïñ 20201008¸ßË¹ÂË²¨Æ÷²âÊÔÍ¨¹ı ×ß¹ıÁËÕâ¸öÁ÷³Ì£¬Ê£ÏÂµÄ¾ÍÊÇÂË²¨Æ÷¹¹ÔìµÄÎÊÌâ
+	switch (FilterType) //µÍÍ¨ÂË²¨Æ÷×å£¬¸ßÍ¨¾Í1-¾ÍÍêÁË
+	{
+	case 1://¸ßË¹µÍÍ¨ÂË²¨Æ÷£¬¸ßË¹ÆµÓòÍ¼Ïñ 20201008¸ßË¹ÂË²¨Æ÷²âÊÔÍ¨¹ı ×ß¹ıÁËÕâ¸öÁ÷³Ì£¬Ê£ÏÂµÄ¾ÍÊÇÂË²¨Æ÷¹¹ÔìµÄÎÊÌâ
 	{
 		float Sigma = 10.0; //¿ÉÒÔÈÏÎªÊÇ¸ßË¹º¯ÊıµÄ°ë¾¶£¨Í¹Æğ²¿·Ö
 		float D0 = 2 * Sigma * Sigma;
@@ -156,11 +158,13 @@ Mat Filter_Freq(Mat Src,unsigned char FilterType) //ÆµÓòÂË²¨µÄ³¢ÊÔ ÂË²¨Æ÷µÄÉú³ÉÆ
 				Filter.at<float>(i, j) = expf(-d / D0);
 			}
 		}
+		break;
 	}
-	if (FilterType == 2)  //ÀíÏëµÍÍ¨ÂË²¨Æ÷
-	{
+	
+	case 2://ÀíÏëµÍÍ¨ÂË²¨Æ÷
+	{	
 		float Radius = 100;
-		for (int i = 0; i < Filter.rows; i++)
+		for (int i = 0; i < Filter.rows; i++)	
 		{
 			for (int j = 0; j < Filter.cols; j++)
 			{
@@ -174,9 +178,54 @@ Mat Filter_Freq(Mat Src,unsigned char FilterType) //ÆµÓòÂË²¨µÄ³¢ÊÔ ÂË²¨Æ÷µÄÉú³ÉÆ
 				{
 					Filter.at<float>(i, j) = 1.0;
 				}
+			}	
+		}
+		break; 
+	}
+
+	case 3://ÀíÏë´øÍ¨ÂË²¨Æ÷-Õâ¸öÓÃÓÚÂË³öÔëÉù
+	{
+		const float RadiusBig = 100;
+		const float RadiusSmall = 80;
+		for (int i = 0; i < Filter.rows; i++)
+		{
+			for (int j = 0; j < Filter.cols; j++)
+			{
+				float d = pow(i - Src.rows / 2, 2) + pow(j - Src.cols / 2, 2);
+				float RadiusB2 = pow(RadiusBig, 2);
+				float RadiusS2 = pow(RadiusSmall, 2);
+				if ((d > RadiusS2) && (d<RadiusB2))
+				{
+					Filter.at<float>(i, j) = 1.0;
+				}
+				else
+				{
+					Filter.at<float>(i, j) = 0.0;
+				}
 			}
 		}
+		break;
 	}
+
+	case 4://°ÍÌØÎÖË¹µÍÍ¨ÂË²¨Æ÷
+	{				
+		const float D0 = 100;
+		const int n = 4; //½×Êı
+		for (int i = 0; i < Filter.rows; i++)
+		{
+			for (int j = 0; j < Filter.cols; j++)
+			{
+				float D2 = pow(i - Filter.rows / 2, 2) + pow(j - Filter.cols / 2, 2);
+				float D02 = D0 * D0;
+				float K = 0;
+				K = pow(D2 / D02, n);
+				Filter.at<float>(i, j) = 1 / (1 + K);
+			}
+		}
+		break;
+	}
+	}
+
 	Mat res[] = { Mat::zeros(SuCai.size(),CV_32FC1),Mat::zeros(SuCai.size(),CV_32FC1) };
 	multiply(Channels[Re], Filter, res[Re]);
 	multiply(Channels[Im], Filter, res[Im]);

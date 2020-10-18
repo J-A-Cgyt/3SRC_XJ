@@ -1,7 +1,88 @@
 #include "Func_Proj_2nd.h"
 string window_name_f3 = "Demo_Result"; //结果显示窗
 
-//均值滤波器族需自行实现种类：几何均值、谐波均值、逆谐波均值 数字图像处理page203、204
+//均值滤波器族需自行实现种类：几何均值、谐波均值、逆谐波均值 数字图像处理page203、204 
+//以下两函数均为进行多线程优化，考虑到主控设备性能未知，此类滤波器主要还是作为算法验证，若投入使用，尝试进行多线程改造或GPU加速
+Mat GeoMeanFilter(Mat Src, int size)  //几何均值,暂定还是CV_8UC1类型吧 注意，此函数使用float会导致越界，则此类问题只能使用double,谐波均值应也有类似的问题 果然消不掉胡椒噪声（黑点）
+{
+	Mat dst = Src.clone();
+	double X = 0;
+	double Y = 0;
+	for (int i = 0; i < Src.rows; i++) {
+		for (int j = 0; j < Src.cols; j++) {
+			X = Src.at<uchar>(i, j);
+			for (int k = i - size; k <= i + size; k++)  //连乘循环
+			{
+				for (int l = j - size; l <= j + size; l++)
+				{
+					if ((k < 0) || (l < 0) || (k >= Src.rows) || (l >= Src.cols))
+					{continue;}
+					else if ((k == i) && (l == j)){
+						continue;}
+					else
+					{
+						X = X * Src.at<uchar>(k, l);
+						//cout << k << "," << l << endl;
+					}
+					
+				}
+			}
+			Y = pow(X, 1 / pow(2 * size + 1, 2));
+			//cout << Y<<" ";
+			dst.at<uchar>(i, j) = (unsigned char)Y;
+		}
+	}
+	//cout << dst;
+	return dst;
+}
+
+Mat HarmonicMeanFilter(Mat Src, int size,double n,int Flag) //正逆谐波均值滤波器,Flag是正逆选择器,正谐波滤波器参数n无影响
+{
+	Mat dst = Mat(Src.rows, Src.cols, Src.type()); 
+	double X = 0;
+	double Y = 0;
+	double Z = 0;
+	if (Flag > 0) { //谐波均值，如何避免为0的问题呢
+		for (int i = 0; i < Src.rows; i++) {
+			for (int j = 0; j < Src.cols; j++) {
+				for (int k = i - size; k <= i + size; k++)  //求和循环
+				{
+					for (int l = j - size; l <= j + size; l++)
+					{
+						if ((k < 0) || (l < 0) || (k >= Src.rows) || (l >= Src.cols)){
+							continue;}
+						X = X + (1 / (Src.at<uchar>(k, l)+0.0000001));  //增加数值是为了避免出现0为分母的情况
+					}
+				}
+				Y = pow(2 * size + 1, 2) / X;
+				dst.at<uchar>(i, j) = (unsigned char)Y;
+				X = 0; Y = 0;
+			}
+		}
+	}
+	else //逆谐波均值
+	{
+		for (int i = 0; i < Src.rows; i++) {
+			for (int j = 0; j < Src.cols; j++) {
+				for (int k = i - size; k <= i + size; k++)  //求和循环
+				{
+					for (int l = j - size; l <= j + size; l++)
+					{
+						if ((k < 0) || (l < 0) || (k >= Src.rows) || (l >= Src.cols)){
+							continue;}
+						X = X + pow(Src.at<uchar>(k, l), n + 1);
+						Y = Y + pow(Src.at<uchar>(k, l), n);
+				
+					}
+				}		
+				Z = X / Y;
+				dst.at<uchar>(i, j) = (unsigned char)Z;
+				X = 0; Y = 0;
+			}
+		}
+	}
+	return dst;
+}
 
 //统计排序滤波器族需自行实现的种类：最大值、最小值滤波器，中点滤波，修正的alpha均值滤波器 数字图像处理page205-207
 
