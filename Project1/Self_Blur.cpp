@@ -71,8 +71,7 @@ Mat HarmonicMeanFilter(Mat Src, int size,double n,int Flag) //ÕýÄæÐ³²¨¾ùÖµÂË²¨Æ÷
 						if ((k < 0) || (l < 0) || (k >= Src.rows) || (l >= Src.cols)){
 							continue;}
 						X = X + pow(Src.at<uchar>(k, l), n + 1);
-						Y = Y + pow(Src.at<uchar>(k, l), n);
-				
+						Y = Y + pow(Src.at<uchar>(k, l), n);				
 					}
 				}		
 				Z = X / Y;

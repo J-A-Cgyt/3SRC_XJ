@@ -154,3 +154,71 @@ GPU初次测试，图像加减的配合代码  20200706转移
 
 	//double endtime = (double)(End - Start) / CLOCKS_PER_SEC;
 	//printf("Total time: %f ms \n", endtime * 1000);	//ms为单位
+
+陈年旧码 包括眼动检测、扩散滤波等 20201025转移
+	/*	
+	Point3f center;
+	center = IrisDect(Temp_Array[0],COUNTOUR);
+	cvtColor(SRC_2nd, Temp_Buffer, COLOR_GRAY2BGR);
+	circle(Temp_Buffer, Point(center.x, center.y), center.z, Scalar(0, 0, 255), 3);
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);  //眼动检测的主程序代码，注释于20200705
+
+
+	Temp_Buffer = Thershold_区域(SRC_2nd);
+	Temp_Array.push_back(Temp_Buffer);
+	//Temp_Buffer.release();
+	imshow(window_name, Temp_Array[0]);
+	waitKey(0);
+
+	//第二部分的读取代码
+	SRC_2nd = imread(Load_Path_2nd_2, IMREAD_GRAYSCALE);
+	if (!SRC_2nd.data)
+		{
+			cout << "读取失败" << endl;
+			return -1;
+		}
+	imshow(window_name, SRC_2nd);
+	waitKey(0);
+	Temp_Array.push_back(SRC_2nd);
+	//读取代码结束
+
+	Temp_Buffer = JiaoDian_SURF_CGYT(Temp_Array[0], Temp_Array[1]); //SURF方法+暴力匹配实现 20200215
+
+	//vector<Point2f> subPix_Point;
+	//subPix_Point = subPix_pt(Temp_Array[0]);
+
+	//TrackBar_cgyt_canny(0, 0); //TrackBar重新熟悉
+
+	//包含类的源文件该如何创建并添加至现有项目中？ 存在问题 20200318
+	//Temp_Array.push_back(Conv_Cgyt(Temp_Array[0],SOBEL_CGYT)); 类的相关问题已在第三个项目中解决，至20200321未出现问题，一个源文件实现主函数，一个源文件实现类成员方法。而类定义写在另一个头文件中
+
+	//FT_CGYT(Temp_Array[0]);  //傅里叶变换 20200323通过
+
+	//int res_state = Calib_Cgyt(Temp_Array[0]); 注释与20200410
+	//cout << res_state;
+
+	Temp_Buffer = Anisotropic_Cgyt(Temp_Array[0], 20, 0.75, 10);
+	imshow(window_name, Temp_Buffer);	
+	imwrite("G:\\Pictures\\Test For Programming\\003.2.jpg", Temp_Buffer);
+	cout << "end" << endl;
+	waitKey(0);
+	
+	Temp_Buffer = AnisotropicMT_Cgyt(Temp_Array[0], 20, 0.75, 10);
+
+	Temp_Buffer = WaveLetHarrD_CGYT(Temp_Array[0], 1);
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
+
+	Temp_Array[0] = WaveLetHarrR_CGYT(Temp_Buffer, 1);
+	imshow(window_name, Temp_Array[0]);
+	waitKey(0);
+	*/
+
+C++学习代码 202001025转移
+	Temp_Array.push_back(Mat());
+	auto iterMB = Temp_Array.begin(); //整一个开始的迭代器
+	*iterMB = Temp_Buffer.clone();    //现在开始试一下迭代器吧，逐渐把容器访问的习惯改过来
+	Temp_Array.push_back(Temp_Buffer);
+	Temp_Buffer = imread(LoadPath_Msi_C, IMREAD_GRAYSCALE);
+
