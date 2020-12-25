@@ -41,6 +41,8 @@ double Solve_Cgyt(double P); //非线性方程组求解函数 方程为 x - 0.5*sin(2 * x) = 
 
 vector<Point2d> SubPixel_Contours_Cgyt(Mat Src_2, vector<Point> Contours_2, int second); //普通矩方法的亚像素边缘检测重载
 
+vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double third); //Zernike矩的正式实现
+
 #endif // !Self_Blur
 
 #ifndef Pre_Proc

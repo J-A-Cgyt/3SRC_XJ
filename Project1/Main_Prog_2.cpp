@@ -4,11 +4,10 @@ string Load_Path_2nd_1 = "G:\\Pictures\\Test For Programming\\DSC_7114.jpg"; //Æ
 string Load_Path_2nd_2 = "G:\\Pictures\\Test For Programming\\DSC_7115.jpg"; //Æ´½ÓÔ­Í¼2
 string Load_Path_2nd_3 = "G:\\Pictures\\Test For Programming\\001.jpg"; //·ÖË®Áë·Ö¸î
 string Load_Path_2nd_4 = "G:\\Pictures\\Test For Programming\\¼Óµ¯»É.bmp"; // subPixel_Contours detect by Moments
-string Load_Path_2nd_5 = "G:\\Pictures\\Test For Programming\\Ïã½¶3.jpg"; // subPixel_Contours detect by Moments
-string Load_Path_2nd_6 = "G:\\Pictures\\Test For Programming\\sign_20200329.jpg"; // subPixel_Contours detect by Moments
-string Load_Path_2nd_7 = "G:\\Pictures\\Test For Programming\\003.1.jpg"; // subPixel_Contours detect by Moments
-string Load_Path_2nd_8 = "G:\\Pictures\\Test For Programming\\eye.jpg"; // subPixel_Contours detect by Moments
-
+string Load_Path_2nd_5 = "G:\\Pictures\\Test For Programming\\Ïã½¶3.jpg"; 
+string Load_Path_2nd_6 = "G:\\Pictures\\Test For Programming\\sign_20200329.jpg";
+string Load_Path_2nd_7 = "G:\\Pictures\\Test For Programming\\003.1.jpg"; 
+string Load_Path_2nd_8 = "G:\\Pictures\\Test For Programming\\eye.jpg"; 
 string window_name = "Demo_Result"; //½á¹ûÏÔÊ¾´°
 
 Mat SRC_2nd; //È«¾ÖÔ´Í¼
@@ -29,14 +28,70 @@ int main()
 	Mat Temp_Buffer;
 
 	//Ô­Ê¼Í¼Ïñ×é¶ÁÈ¡
-	SRC_2nd = imread(Load_Path_2nd_8, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(Load_Path_2nd_4, IMREAD_GRAYSCALE);
 
 	if (!SRC_2nd.data)
 	{
 		cout << "¶ÁÈ¡Ê§°Ü" << endl;
 		return -1;
 	}
-	//ÉãÏñ»ú¿ØÖÆ
+	Temp_Array.push_back(SRC_2nd);
+	//ÒÔÏÂÊÇÑÇÏñËØ¼ì²âÊµÏÖµÄÇ°ÖÃ´¦Àí
+
+	Temp_Buffer = Gaosi_Ë«±ß(Temp_Array[0]); //¸ßË¹ÂË²¨+Èñ»¯
+	//imshow(window_name, Temp_Buffer);
+	//waitKey(0);
+	Temp_Array.push_back(Temp_Buffer);
+
+	Canny(Temp_Array[1], Temp_Buffer, 80, 240); //canny±ßÔµ¼ì²â
+	//imshow(window_name, Temp_Buffer);
+	//waitKey(0);
+	Temp_Array.push_back(Temp_Buffer);
+
+	vector<vector<Point>> Contours_Dected, Contours_Seletced;
+	vector<Point> Contours_for_SubPixCont;
+	vector<Point2d> Contours_subPix_result;
+	Moments ¾Ø;
+	findContours(Temp_Array[2], Contours_Dected, RETR_EXTERNAL, CHAIN_APPROX_NONE, Point());  //Ô²ÐÎÌØÕ÷³õ²½¶¨Î»	
+	for (int i = 0; i < Contours_Dected.size(); i++)
+	{
+		size_t k = Contours_Dected[i].size();
+		if (k < 1000 && k > 700)
+		{
+			¾Ø = moments(Contours_Dected[i]);
+			if (abs(¾Ø.nu11) < 0.001)
+			{
+				//ÅÐ¶¨¹éÒ»»¯µÄ¸ß½×ÖÐÐÄ¾à×÷ÎªÅÐ¶Ï±ê×¼£¬¿ÉÄÜËÄ¸öÈý½×¹éÒ»»¯ÖÐÐÄ¾Ø¾ùÎª¼«Ð¡Êý10e-4¼¶±ð¿ÉÈÏÎªÔÚx¡¢y·½Ïò¾ù²»´æÔÚÆ«ÏòÐÔ£¬¿ÉÈÏÎª¸ÃÐÎ×´±¾ÉíÐý×ª²»±ä		
+				Contours_Seletced.push_back(Contours_Dected[i]);
+			}
+		}
+	}
+	Contours_for_SubPixCont = Contours_Seletced[0];
+	cvtColor(Temp_Array[0], Temp_Buffer, COLOR_GRAY2BGR);
+	drawContours(Temp_Buffer, Contours_Seletced, -1, Scalar(0, 0, 255));
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
+	Temp_Array.push_back(Temp_Buffer); //Ö¸ÕëÎÊÌâÎ´Ã÷È·£¬×¢Òâ´«ÊäµØÖ·µ¼ÖÂvectorÈÝÆ÷ÖÐÄÚÈÝÒ»ÖÂµÄ¿ÉÄÜ
+
+
+	/*
+	Temp_Array¼ì²é
+	for (int k = 0; k < Temp_Array.size(); k++)
+	{
+		imshow(window_name, Temp_Array[k]);
+		cout << k << endl;
+		waitKey(0);
+	}
+	*/
+
+	//Temp_Array[1]ÊÇcanny¼ì²â½á¹û
+	//SubPixel_Contours_Cgyt(Temp_Array[1],Contours_for_SubPixCont);
+
+	//ÑÇÏñËØ±ßÔµ¼ì²â´úÂë
+	Contours_subPix_result = SubPixel_Contours_Cgyt(Temp_Array[0], Contours_for_SubPixCont,1.0);
+	cout << Contours_subPix_result[0] << endl;
+
+/*	//ÉãÏñ»ú¿ØÖÆ
 	VideoCapture Cam1;
 
 	namedWindow(window_name, WINDOW_NORMAL);
@@ -66,7 +121,7 @@ int main()
 		index++;
 	}
 	
-/*
+
 	Temp_Buffer = Thershold_ÇøÓò(SRC_2nd);
 	Temp_Array.push_back(Temp_Buffer);
 	//Temp_Buffer.release();
