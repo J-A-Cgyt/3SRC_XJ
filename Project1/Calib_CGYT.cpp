@@ -8,29 +8,29 @@ string Window_calib = "Corners_dected";
 int Calib_Cgyt(Mat InputOutputArray)
 {
 	//图像加载路径
-	Source_Path[0] = "G:\\Pictures\\Test For Programming\\calb13\\1.jpg";
-	Source_Path[1] = "G:\\Pictures\\Test For Programming\\calb13\\2.jpg";
-	Source_Path[2] = "G:\\Pictures\\Test For Programming\\calb13\\3.jpg";
-	Source_Path[3] = "G:\\Pictures\\Test For Programming\\calb13\\4.jpg";
-	Source_Path[4] = "G:\\Pictures\\Test For Programming\\calb13\\5.jpg";
-	Source_Path[5] = "G:\\Pictures\\Test For Programming\\calb13\\6.jpg";
-	Source_Path[6] = "G:\\Pictures\\Test For Programming\\calb13\\7.jpg";
-	Source_Path[7] = "G:\\Pictures\\Test For Programming\\calb13\\8.jpg";
-	Source_Path[8] = "G:\\Pictures\\Test For Programming\\calb13\\9.jpg";
-	Source_Path[9] = "G:\\Pictures\\Test For Programming\\calb13\\10.jpg";
+	Source_Path[0] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_1.jpg";
+	Source_Path[1] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_2.jpg";
+	Source_Path[2] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_3.jpg";
+	Source_Path[3] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_4.jpg";
+	Source_Path[4] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_5.jpg";
+	Source_Path[5] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_6.jpg";
+	Source_Path[6] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_7.jpg";
+	Source_Path[7] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_8.jpg";
+	Source_Path[8] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_9.jpg";
+	Source_Path[9] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_10.jpg";
 
 	//窗口展示
 	namedWindow(Window_calib, WINDOW_NORMAL);
 	
 	//图像读取
 	vector<Mat> Src_img;
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		Src_img.push_back(imread(Source_Path[i], IMREAD_GRAYSCALE));
 	}
-	cv::Size ChessboardSize = Size(9, 6);   //棋盘格格子数
-	vector<vector<Point2f>> Corners_queue;  //检测所得的图像点序列组
-	vector<Point2f> Corners;  //单幅图像测得图像点暂存
+	cv::Size ChessboardSize = Size(11, 8);   //棋盘格格子数
+	vector<vector<Point2f>> Corners_queue;   //检测所得的图像点序列组
+	vector<Point2f> Corners;                 //单幅图像测得图像点暂存
 
 	//亚像素角点参数设定
 	cv::Size Window_size = Size(5, 5);
@@ -43,15 +43,16 @@ int Calib_Cgyt(Mat InputOutputArray)
 		0.01);  //最小精度
 	
 	//检测循环
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
-		bool ifFound = findChessboardCorners(Src_img[0], ChessboardSize, Corners);
+		//resize(Src_img[i], Src_img[i], Size(2012, 1518));
+		bool ifFound = findChessboardCorners(Src_img[i], ChessboardSize, Corners);
 		if (ifFound = false)
 		{
 			cout << "find corners failed" << endl;
 			return -2;
 		}
-		cornerSubPix(Src_img[0], Corners, Window_size, Zone_0, Criteria_cgyt);
+		cornerSubPix(Src_img[i], Corners, Window_size, Zone_0, Criteria_cgyt);
 		Corners_queue.push_back(Corners);
 	}
 	//角点绘制展示
@@ -63,7 +64,7 @@ int Calib_Cgyt(Mat InputOutputArray)
 
 //内外参计算
 	//世界坐标计算
-	cv::Size GridSize = cv::Size(20, 20);
+	cv::Size GridSize = cv::Size(6, 6);
 	vector<vector<Point3f>> Cord_world;
 
 	vector<Point3f> Cord_WordQueue;
@@ -78,7 +79,7 @@ int Calib_Cgyt(Mat InputOutputArray)
 			Cord_WordQueue.push_back(Cord_Temp);
 		}
 	}
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		Cord_world.push_back(Cord_WordQueue);
 	}
