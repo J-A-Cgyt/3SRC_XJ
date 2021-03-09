@@ -222,3 +222,49 @@ C++学习代码 202001025转移
 	Temp_Array.push_back(Temp_Buffer);
 	Temp_Buffer = imread(LoadPath_Msi_C, IMREAD_GRAYSCALE);
 
+20210309转移 眼睛的亚像素
+		//以下是亚像素检测实现的前置处理
+	Temp_Array.push_back(SRC_2nd);
+
+	auto iter_A = Temp_Array.begin();
+	equalizeHist(SRC_2nd, *iter_A);
+	imshow(window_name, *iter_A);
+	waitKey(0);
+	Mat kernel = getStructuringElement(MORPH_CROSS, Size(7, 7));  //形态学卷积核
+	morphologyEx(*iter_A, *iter_A, MORPH_OPEN, kernel);  //形态学操作
+	imshow("Demo_Result", *iter_A);
+	waitKey(0);
+	threshold(*iter_A, *iter_A, 20, 255, THRESH_BINARY);  //看来得用OSTU了
+	//GaussianBlur(*iter_A, *iter_A, Size(15, 15), 0);
+	//threshold(*iter_A, *iter_A, 10, 255, THRESH_BINARY_INV);
+	imshow("Demo_Result", *iter_A);
+	waitKey(0);
+
+	vector<vector<Point>> Contours_Dected, Contours_Seletced;
+	vector<Point> Contours_for_SubPixCont;
+	vector<Point2d> Contours_subPix_result;
+	Moments 矩;
+	findContours(Temp_Array[0], Contours_Dected, RETR_EXTERNAL, CHAIN_APPROX_NONE, Point());  //圆形特征初步定位	
+	for (int i = 0; i < Contours_Dected.size(); i++)
+	{
+		size_t k = Contours_Dected[i].size();
+		if (k < 1000 && k > 700)
+		{
+			矩 = moments(Contours_Dected[i]);
+			if (abs(矩.nu11) < 0.001)
+			{
+				//判定归一化的高阶中心距作为判断标准，可能四个三阶归一化中心矩均为极小数10e-4级别可认为在x、y方向均不存在偏向性，可认为该形状关于X，Y轴均对称		
+				Contours_Seletced.push_back(Contours_Dected[i]);
+			}
+		}
+	}
+	if (Contours_for_SubPixCont.size() == 0) { throw out_of_range("没有符合条件的素材边缘!"); return -1; }
+	Contours_for_SubPixCont = Contours_Seletced[0];
+	cvtColor(Temp_Array[0], Temp_Buffer, COLOR_GRAY2BGR);
+	drawContours(Temp_Buffer, Contours_Seletced, -1, Scalar(0, 0, 255));
+	imshow(window_name, Temp_Buffer);
+	waitKey(0);
+	Temp_Array.push_back(Temp_Buffer); //指针问题未明确，注意传输地址导致vector容器中内容一致的可能
+
+	//亚像素边缘检测代码
+	Contours_subPix_result = SubPixel_Contours_Cgyt(Temp_Array[0], Contours_for_SubPixCont, 2.0);

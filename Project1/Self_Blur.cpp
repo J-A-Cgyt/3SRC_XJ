@@ -633,10 +633,10 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 	auto iterMc = MomentsCgyt.cbegin();
 	auto iterP = pointRes.begin();
 	for (; iterP < pointRes.end(); iterP++) {  //坐标计算循环
-		phi = atan(get<1>(*iterMc) / get<0>(*iterMc));
+		phi = atan(get<1>(*iterMc) / get<0>(*iterMc));   //phi是边缘的方向角
 		z11_tie = get<0>(*iterMc)*cos(phi) + get<1>(*iterMc)*sin(phi);
-		l = get<2>(*iterMc) / z11_tie;
-		k = 3 * z11_tie / (2 * pow((1 - l * l), 3 / 2));
+		l = get<2>(*iterMc) / z11_tie;                   //l是边缘到中心的距离
+		k = 3 * z11_tie / (2 * pow((1 - l * l), 3 / 2)); //k是灰度值之差
 		*iterP = make_tuple(phi, k, l);
 	}
 
@@ -649,5 +649,12 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 		ys = iterC->y + get<2>(*iterPc) * sin(get<0>(*iterPc));
 		points.push_back(Point2d(xs, ys));
 	}
+
+	/*
+	 *对边缘的判定和还需要其他的专用算法 这个需要继续看文献做试验 20210308 明天把相机拿过去拍几张钢镚的图玩玩 
+	 *用ps和matlab先对边缘的特性做一下分析 主要看其灰度变化的规律
+	 */
+
+
 	return points;
 }

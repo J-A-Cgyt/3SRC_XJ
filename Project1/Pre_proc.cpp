@@ -18,6 +18,9 @@ Mat Thershold_区域(Mat Src)
 	return Dst;
 }
 
+//OTSU的原理和实现代码还是要弄一下20210307 emmm好像直接用 cv::threshold就行 如果要在中间插代码 可能还是得自己实现才行
+
+
 //再尝试一下傅里叶变换吧，没道理就这个函数用不了 启动20200323
 Mat FT_CGYT(Mat Src,Mat &MiddleRes) //增加一个引用用于导出频域滤波的素材
 {

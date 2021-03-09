@@ -23,7 +23,7 @@ static void CannyThreshold(int, void*)
 
 int TrackBar_cgyt_canny(int, char** argv)
 {
-	src = imread("G:\\Pictures\\Test For Programming\\ษจร่าว_ว๚ฯ฿.jpg", IMREAD_COLOR);
+	src = imread("F:\\Pictures\\Test For Programming\\coins\\coin2.bmp", IMREAD_GRAYSCALE);
 	if (!src.data)
 	{
 		return -1;
