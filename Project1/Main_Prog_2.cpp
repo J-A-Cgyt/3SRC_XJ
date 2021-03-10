@@ -85,9 +85,25 @@ int main()
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
 
-	vector<vector<cv::Point2i>> contours;
+	std::vector<std::vector<cv::Point2i>> contours;
 	findContours(Temp_Buffer, contours, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+	std::vector<std::vector<cv::Point2i>> selected_Contours;
 
+	auto iterC = contours.begin(); //迭代器
+	for (; iterC < contours.end(); iterC++) {
+		if (iterC->size() >= 3000) {
+			selected_Contours.push_back(*iterC);
+		}
+	}
+
+	contours.clear();
+
+	cv::Mat doubleSrc;
+	
+	SRC_2nd.convertTo(doubleSrc,CV_64FC1);
+
+	std::vector<cv::Point2d> subpixPoints;  //亚像素级的轮廓坐标点
+	subpixPoints = SubPixel_Contours_Cgyt(doubleSrc, selected_Contours[0], 3.0);  //这个其实已经可以向高级主控传送检测结果了
 
 	//HistogramCGYT(SRC_2nd);
 	//FT_CGYT(SRC_2nd, Temp_Buffer);

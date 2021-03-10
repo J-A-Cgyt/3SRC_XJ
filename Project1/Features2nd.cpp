@@ -412,5 +412,6 @@ int Components_Connected_cgyt(Mat Src)
 	}
 	imshow(window_name_f1, outPut);
 	waitKey(0);
+
 	return 0;
 }

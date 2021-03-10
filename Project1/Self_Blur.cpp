@@ -625,6 +625,7 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 		I11 = RoI.dot(M11I);
 		R20 = RoI.dot(M20);
 		*iterM = make_tuple(R11, I11, R20);
+		iterM++;
 	}
 
 	double phi, k, l; //计算结果
@@ -635,9 +636,10 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 	for (; iterP < pointRes.end(); iterP++) {  //坐标计算循环
 		phi = atan(get<1>(*iterMc) / get<0>(*iterMc));   //phi是边缘的方向角
 		z11_tie = get<0>(*iterMc)*cos(phi) + get<1>(*iterMc)*sin(phi);
-		l = get<2>(*iterMc) / z11_tie;                   //l是边缘到中心的距离
+		l = (get<2>(*iterMc) / z11_tie) * 7 / 2;                   //l是边缘到中心的距离 因在单位元中计算 其实际大小还需要乘以模板圆的半径即7/2才是像素单位20210310修正
 		k = 3 * z11_tie / (2 * pow((1 - l * l), 3 / 2)); //k是灰度值之差
 		*iterP = make_tuple(phi, k, l);
+		iterMc++;
 	}
 
 	vector<Point2d> points;
@@ -648,6 +650,7 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 		xs = iterC->x + get<2>(*iterPc) * cos(get<0>(*iterPc));
 		ys = iterC->y + get<2>(*iterPc) * sin(get<0>(*iterPc));
 		points.push_back(Point2d(xs, ys));
+		iterC++;
 	}
 
 	/*
