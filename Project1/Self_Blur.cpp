@@ -630,26 +630,27 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 
 	double phi, k, l; //计算结果
 	double z11_tie;
-	decltype(MomentsCgyt) pointRes(Contours.size());
+	decltype(MomentsCgyt) pointRes(Contours.size());  //用于记录角度(phi) 距离(L) 灰度阶跃值(k)的三元组(double)
 	auto iterMc = MomentsCgyt.cbegin();
 	auto iterP = pointRes.begin();
 	for (; iterP < pointRes.end(); iterP++) {  //坐标计算循环
-		phi = atan(get<1>(*iterMc) / get<0>(*iterMc));   //phi是边缘的方向角
+		phi = atan(get<1>(*iterMc) / get<0>(*iterMc));                 //phi是边缘的方向角
 		z11_tie = get<0>(*iterMc)*cos(phi) + get<1>(*iterMc)*sin(phi);
-		l = (get<2>(*iterMc) / z11_tie) * 7 / 2;                   //l是边缘到中心的距离 因在单位元中计算 其实际大小还需要乘以模板圆的半径即7/2才是像素单位20210310修正
-		k = 3 * z11_tie / (2 * pow((1 - l * l), 3 / 2)); //k是灰度值之差
+		l = (get<2>(*iterMc) / z11_tie) * 7 / 2;                       //l是边缘到中心的距离 因在单位元中计算 其实际大小还需要乘以模板圆的半径即7/2才是像素单位20210310修正
+		k = abs(3 * z11_tie / (2 * pow((1 - l * l), 3 / 2)));          //k是灰度值之差 仅用于边缘是否有效的判定 不用于计算
+		if (k > 255) { k = 255; }                                      //后期再计算有效的k阈值时将大于等于255的点剔除，并默认其为有效点 但是不参与判定
 		*iterP = make_tuple(phi, k, l);
 		iterMc++;
 	}
 
-	vector<Point2d> points;
+	std::vector<cv::Point2d> points;
 	auto iterPc = pointRes.cbegin();
 	iterC = Contours.cbegin();
 	double xs, ys;
 	for (; iterPc < pointRes.cend(); iterPc++) {
 		xs = iterC->x + get<2>(*iterPc) * cos(get<0>(*iterPc));
 		ys = iterC->y + get<2>(*iterPc) * sin(get<0>(*iterPc));
-		points.push_back(Point2d(xs, ys));
+		points.push_back(cv::Point2d(xs, ys));
 		iterC++;
 	}
 
@@ -657,7 +658,51 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 	 *对边缘的判定和还需要其他的专用算法 这个需要继续看文献做试验 20210308 明天把相机拿过去拍几张钢镚的图玩玩 
 	 *用ps和matlab先对边缘的特性做一下分析 主要看其灰度变化的规律
 	 */
+	auto iterPointsRes_check = pointRes.begin(); //根据灰度阶跃剔除不正确的边缘
+	std::vector<unsigned char> k_array;  //用于提取k值的数组
+	for (; iterPointsRes_check < pointRes.end(); iterPointsRes_check++) {
+		if ((unsigned char)get<1>(*iterPointsRes_check) == 255) {
+			continue;
+		}
+		k_array.push_back((unsigned char)get<1>(*iterPointsRes_check));
+	}
 
+	//从原始图像中获取灰度阶跃样本（避开点集所包围的区域之后条件反而加强了 那就算了还是不避开了）
+	size_t background_start = k_array.size();        //背景采样点开始的索引 用作备份 也需要用
+	int xNum, yNum;                                  //纵向和横向的采样点数 按图像的长宽比取样，将采样点均匀的分布在图像中
+	yNum = (int)sqrt(16 * k_array.size() * Src.rows / Src.cols);
+	xNum = (int)(yNum*Src.cols / Src.rows);          //图像中长的分段数应是采样点数+1（小学植树问题）
+	int xStep = (int)(Src.cols / (xNum+1));
+	int yStep = (int)(Src.rows / (yNum + 1));
+	cv::Mat sampleWindow(Size(7, 7), CV_8UC1);       //采样窗口大小3*3;  注意构造函数的使用方式
+	unsigned char k_background = 0;
+	double maxV(0), minV(0);
+	//cv::Rect sampleMask(cv::boundingRect(Contours));		//获取原始像素边缘的最小矩形 为简化计算，无视旋转角度
+	for (int x = 0; x < xNum; x++)      //col坐标
+	{
+		for (int y = 0; y < yNum; y++)  //row坐标
+		{
+			//if (sampleMask.contains(cv::Point2i((x + 1)*xStep, (y + 1)*yStep))) { continue; } //若采样点再感兴趣区域内则放弃采集
+			sampleWindow = Src(cv::Rect( (x + 1)*xStep,(y + 1)*yStep, 3, 3));
+			cv::minMaxLoc(sampleWindow,&minV,&maxV);
+			k_background = (unsigned char)abs(maxV - minV);
+			k_array.push_back(k_background);
+		}
+	}
 
-	return points;
+	//获取OTSU阈值
+	unsigned char k_value_otsu = OTSU_Value_Calc(k_array);  //这个函数时自行用的
+
+	//删去低于阈值的伪点 理论支撑 删去部分伪点对整个轮廓拟合精度存在正面影响 删去点的数量未超过总样本数量的5% 再记录一个被删去的点索引用于分析数据
+	std::vector<cv::Point2d> points_reduced;  //删去无效点后的亚像素点序列
+	iterPc = pointRes.cbegin();				  //重新再用一下这个迭代器  
+	for (auto iterPs = points.begin(); iterPs < points.end(); iterPs++) {  //试验证明大概会削掉%7-%8的无效点 剔除的比例还算可以接受 20210312
+		if (get<1>(*iterPc) >= k_value_otsu) {
+			points_reduced.push_back(*iterPs);
+		}
+		iterPc++;
+	}
+
+	//关于轮廓的评价 单纯的拟合没有用，需要有设计数据方可 能够总结的也就是一些几何参数和部分几何矩参数到这个层次 数据其实已经很少了
+	return points_reduced;
 }

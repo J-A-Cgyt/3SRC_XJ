@@ -51,12 +51,18 @@
     <ClCompile Include="Main_Prog_2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DataTransTCP.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Func_Proj_2nd.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MathCgyt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTransTCP.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

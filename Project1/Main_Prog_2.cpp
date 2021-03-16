@@ -1,5 +1,6 @@
 #include "Func_Proj_2nd.h"
 #include <ctime>
+#include "DataTransTCP.h"
 
 //#define XPS15
 #ifdef XPS15
@@ -77,11 +78,26 @@ int main()
 	}
 	imshow(window_name, SRC_2nd);
 	waitKey(0);
-	Temp_Array.push_back(SRC_2nd);
+	Temp_Array.push_back(SRC_2nd);  //Temp_Array[0];
 	Temp_Buffer = SRC_2nd.clone();
  
-	GaussianBlur(Temp_Buffer, Temp_Buffer, cv::Size(7, 7), 1.0);
-	threshold(Temp_Buffer, Temp_Buffer, 0, 255, THRESH_OTSU);
+	//GaussianBlur(Temp_Buffer, Temp_Buffer, cv::Size(7, 7), 0);
+	Temp_Array.push_back(Temp_Buffer);
+
+	//边缘图像计算
+	Laplacian(Temp_Buffer, Temp_Buffer, CV_8UC1);
+	//convertScaleAbs(Temp_Buffer, Temp_Buffer);
+	threshold(Temp_Buffer, Temp_Buffer, 14, 1, THRESH_BINARY);  //这个人为规定的数值可能会导致不同曝光参数的图结果不一样 事实证明直到coin5才出现明显的问题 适应性还是很强的 对coin2-4阈值设定为14
+	//而coin5因曝光参数设置问题已经难以区分背景和硬币部分的边缘明显程度 这样的图说不定直接OTSU会有更好的结果（都差不多亮 才会导致这样的结果） COIN5果然是直接OTSU效果好
+	//原图与边缘图相乘
+	Mat masked = Temp_Buffer.mul(Temp_Array[0]);
+	imshow(window_name, masked);
+	waitKey(0);
+
+	//OTSU之前最好弄个边缘检测的
+	//double otsu_value = threshold(SRC_2nd, Temp_Buffer, 0, 255, THRESH_OTSU);  //顺便把otsu的值记录一下 73 直接OTSU
+	double otsu_value = threshold(masked, Temp_Buffer, 0, 255, THRESH_OTSU);     //顺便把otsu的值记录一下 54 边缘强化OTSU
+	threshold(SRC_2nd, Temp_Buffer, otsu_value, 255, THRESH_BINARY);
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
 
@@ -91,9 +107,14 @@ int main()
 
 	auto iterC = contours.begin(); //迭代器
 	for (; iterC < contours.end(); iterC++) {
-		if (iterC->size() >= 3000) {
+		if (iterC->size() >= 3000 & iterC->size()<4000) {
 			selected_Contours.push_back(*iterC);
 		}
+	}
+	
+	if (selected_Contours.size() == 0) {
+		printf("Error：没有找到合适的边缘\n");
+		return -3;
 	}
 
 	contours.clear();
@@ -103,7 +124,12 @@ int main()
 	SRC_2nd.convertTo(doubleSrc,CV_64FC1);
 
 	std::vector<cv::Point2d> subpixPoints;  //亚像素级的轮廓坐标点
-	subpixPoints = SubPixel_Contours_Cgyt(doubleSrc, selected_Contours[0], 3.0);  //这个其实已经可以向高级主控传送检测结果了
+	subpixPoints = SubPixel_Contours_Cgyt(doubleSrc, selected_Contours[0], 3.0);  
+	//这个其实已经可以向高级主控传送检测结果了还是用TCP协议但是如何发送还是个问题 不过似乎有相应的网页看看先20210312 好像不能传诶
+	
+	//要不到时单独开一个线程用来传输 join还是要的 否则引用的内存区被清理了估计得报错
+	std::thread tSend = thread(ContoursSubpixSend,subpixPoints); 
+	tSend.join();
 
 	//HistogramCGYT(SRC_2nd);
 	//FT_CGYT(SRC_2nd, Temp_Buffer);
@@ -127,7 +153,6 @@ int main()
 	//IrisDectH_GPU(SRC_2nd);
 	//ORBG_cgyt(SRC_2nd);
 	//SURFG_cgyt(SRC_2nd, Temp_Buffer); //surf的GPU版本配合代码，20200723注释
-
 
 	destroyAllWindows(); //销毁所有窗口，手动内存管理
 

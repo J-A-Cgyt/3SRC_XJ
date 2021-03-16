@@ -7,6 +7,9 @@
 //阶乘
 double JieCheng(const unsigned int &i);
 
+//简化版OTSU 20210311测试通过 仅用于 unsigned char类型的原始数组
+unsigned char OTSU_Value_Calc(const std::vector<unsigned char>& src);
+
 #endif
 
 //看来就是按照源文件排列的顺序编译的 这个头文件完了以后是calib 这里没打分号直接后面报错 注意这种问题

@@ -123,6 +123,7 @@
     <ClCompile Include="canny_TrackBar.cpp" />
     <ClCompile Include="Cgyt_conv.cpp" />
     <ClCompile Include="CUDA_Try.cpp" />
+    <ClCompile Include="DataTransTCP.cpp" />
     <ClCompile Include="Features2nd.cpp" />
     <ClCompile Include="IrisDect.cpp" />
     <ClCompile Include="Main_Prog_2.cpp" />
@@ -133,6 +134,7 @@
     <ClCompile Include="WaveLet2D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DataTransTCP.h" />
     <ClInclude Include="Func_Proj_2nd.h" />
     <ClInclude Include="MathCgyt.h" />
   </ItemGroup>
