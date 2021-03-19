@@ -1,5 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS //禁用了C4996的错误代码
-//TCP程序，传输轮廓亚像素点集 double类型数据 客户端
+//TCP程序，传输轮廓亚像素点集 double类型数据 客户端 此文件未经测试
 #include <iostream>
 
 //#include <unistd.h>
@@ -29,7 +29,13 @@ struct Point_cgyt {  //这个顺便练一下之前学的那些？ 这个类也许不会使用
 	~Point_cgyt() { };    //析构函数
 };
 
-int ContoursSubpixSend(const std::vector<cv::Point2d>& contoursSubpix,const char* ipAddr = "192.168.137.255") {
+enum TransType {
+	CGYT_SUBPIX = 0x0,
+	CGYT_CVMAT = 0x1,
+	CGYT_PICFILE = 0x2
+};
+
+int ContoursSubpixSend(const std::vector<cv::Point2d>& contoursSubpix,const char* ipAddr = "192.168.137.2") {
 	//先处理点集的事
 	size_t buffer_size = contoursSubpix.size() * 2;
 	auto buffer = new double[buffer_size];  //数据需要转换为char数组才能发送
@@ -89,7 +95,7 @@ int ContoursSubpixSend(const std::vector<cv::Point2d>& contoursSubpix,const char
 	sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(2000);							   //端口
-	serverAddr.sin_addr.S_un.S_addr = inet_addr("192.168.137.2");  //ip地址
+	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);  //ip地址
 	//本机地址 192.168.137.1
 
 	//连接建立
@@ -111,4 +117,65 @@ int ContoursSubpixSend(const std::vector<cv::Point2d>& contoursSubpix,const char
 	delete[] buffer;
 	return 0;
 
+}
+
+int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
+
+	if (src.type() != CV_8UC1) {   //类型检查
+		throw std::runtime_error("only mat of type CV_8UC1 can be send");
+		return -4; 
+	}
+
+	//WinsSock 初始化
+	WORD wVwesionRequested; //16bit字型变量 （WORD）
+	wVwesionRequested = MAKEWORD(2, 2);  //要求的库文件版本号，MAKEWORD宏将两个8bit上下拼成15bit，版本2.2
+	WSADATA wsaData;
+
+	int Result;
+	Result = WSAStartup(wVwesionRequested, &wsaData);  //库文件绑定指示函数，启动socket之前
+	if (Result != 0)
+	{
+		printf("WSAStartup() faild\n");
+		return -1;
+	}
+
+	// Socket创建
+	SOCKET sClient;
+	sClient = socket(AF_INET, SOCK_STREAM, 0);
+	if (sClient == INVALID_SOCKET)
+	{
+		WSACleanup();
+		printf("socket() faild\n");
+		return -2;
+	}
+	//IP地址、协议族、端口设置
+	sockaddr_in serverAddr;
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(2000);							   //端口
+	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);  //ip地址
+	//本机地址 192.168.137.1
+
+	//连接建立
+	Result = connect(sClient, (sockaddr*)&serverAddr, sizeof(serverAddr));
+	if (Result == SOCKET_ERROR)
+	{
+		printf("连接失败");
+		return -3;
+	}
+
+	size_t picStep = src.step[0];  //单行占据内存的空间 字节为单位
+	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char);
+	char* sizeBuffer = new char[sizeOf_size_t];
+	memcpy(sizeBuffer, &picStep, sizeOf_size_t);
+	send(sClient, sizeBuffer, sizeOf_size_t, 0);    //传输mat的step属性
+
+	size_t picSizeBytes = src.total() * src.elemSize();   //总子节大小 但是若要在另一端恢复数据 还需要知道单行大小
+	char* buffer = new char[picSizeBytes];  //如此以来 memcpy可能就不需要了
+	buffer = reinterpret_cast<char*>(src.data);  //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
+	send(sClient, buffer, picSizeBytes, 0);
+
+	//释放空间并断开连接
+	closesocket(sClient);
+	delete[] buffer;
+	return 0;
 }

@@ -19,7 +19,7 @@ string Load_Path_2nd_8 = "G:\\Pictures\\Test For Programming\\eye.jpg"; // subPi
 //#define USE_ALL
 #ifdef USE_ALL
 string LoadPath_Msi_0 = "F:\\Pictures\\Test For Programming\\DSC_8967.jpg";
-
+string LoadPath_Msi_1 = "F:\\Pictures\\Test For Programming\\eye.jpg";
 string LoadPath_Msi_2 = "F:\\Pictures\\Test For Programming\\DSC_15774.jpg";
 string LoadPath_Msi_3 = "F:\\Pictures\\Test For Programming\\DSC_15774-4.jpg";
 string LoadPath_Msi_4 = "F:\\Pictures\\Test For Programming\\天山天池拼.jpg";
@@ -31,10 +31,10 @@ string LoadPath_Msi_9 = "F:\\Pictures\\Test For Programming\\gpgpu.png";
 string LoadPath_Msi_A = "F:\\Pictures\\Test For Programming\\噪声测试图像.png"; 
 
 #endif
-string LoadPath_Msi_1 = "F:\\Pictures\\Test For Programming\\eye.jpg";
+
 string LoadPath_Msi_B("F:\\Pictures\\Test For Programming\\FreqFilterSrc.png");  
 string LoadPath_Msi_C = "F:\\Pictures\\Test For Programming\\1.jpg"; 
-string LoadPath_Msi_D("F:\\Pictures\\Test For Programming\\coins\\coin_2.bmp");
+string LoadPath_Msi_D("F:\\Pictures\\Test For Programming\\coins\\coin_6.bmp");
 
 /*-----------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -101,35 +101,42 @@ int main()
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
 
-	std::vector<std::vector<cv::Point2i>> contours;
+	std::vector<std::vector<cv::Point2i>> contours;								 //存一个附属图像吧，作为TCP发送的局部原始图像用于测试局部通信
 	findContours(Temp_Buffer, contours, RETR_EXTERNAL, CHAIN_APPROX_NONE);
 	std::vector<std::vector<cv::Point2i>> selected_Contours;
 
 	auto iterC = contours.begin(); //迭代器
 	for (; iterC < contours.end(); iterC++) {
-		if (iterC->size() >= 3000 & iterC->size()<4000) {
+		if (iterC->size() >= 3000 && iterC->size()<4000) {
 			selected_Contours.push_back(*iterC);
 		}
 	}
-	
+
 	if (selected_Contours.size() == 0) {
 		printf("Error：没有找到合适的边缘\n");
 		return -3;
 	}
 
-	contours.clear();
 
-	cv::Mat doubleSrc;
-	
+	//增加一个步骤 保存一个局部图像 在算法试验是无需
+	/*
+	 cv::Rect rectRoI(cv::boundingRect(selected_Contours[0])); //需要往外扩展 上下左右各20pix
+	 cv::Rect extendRoI(rectRoI.x - 20, rectRoI.y - 20, rectRoI.width + 40, rectRoI.height + 40);
+	 cv::Mat RoI(SRC_2nd(extendRoI));
+	 imwrite("F:\\Pictures\\Test For Programming\\coins\\coin_6_RoI.jpg", RoI);
+	 */
+	 
+	contours.clear(); //清空边缘
+
+	cv::Mat doubleSrc;	
 	SRC_2nd.convertTo(doubleSrc,CV_64FC1);
-
 	std::vector<cv::Point2d> subpixPoints;  //亚像素级的轮廓坐标点
 	subpixPoints = SubPixel_Contours_Cgyt(doubleSrc, selected_Contours[0], 3.0);  
 	//这个其实已经可以向高级主控传送检测结果了还是用TCP协议但是如何发送还是个问题 不过似乎有相应的网页看看先20210312 好像不能传诶
 	
-	//要不到时单独开一个线程用来传输 join还是要的 否则引用的内存区被清理了估计得报错
-	std::thread tSend = thread(ContoursSubpixSend,subpixPoints); 
-	tSend.join();
+	//要不到时单独开一个线程用来传输 join还是要的 否则引用的内存区被清理了估计得报错 似乎不能应用俩参数 写几个就得几个 20210317暂时注释
+	//std::thread tSend = thread(ContoursSubpixSend,subpixPoints); 
+	//tSend.join();
 
 	//HistogramCGYT(SRC_2nd);
 	//FT_CGYT(SRC_2nd, Temp_Buffer);

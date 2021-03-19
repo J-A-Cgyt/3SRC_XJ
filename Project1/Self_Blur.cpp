@@ -696,7 +696,7 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 	//删去低于阈值的伪点 理论支撑 删去部分伪点对整个轮廓拟合精度存在正面影响 删去点的数量未超过总样本数量的5% 再记录一个被删去的点索引用于分析数据
 	std::vector<cv::Point2d> points_reduced;  //删去无效点后的亚像素点序列
 	iterPc = pointRes.cbegin();				  //重新再用一下这个迭代器  
-	for (auto iterPs = points.begin(); iterPs < points.end(); iterPs++) {  //试验证明大概会削掉%7-%8的无效点 剔除的比例还算可以接受 20210312
+	for (auto iterPs = points.begin(); iterPs < points.end(); iterPs++) {  //试验证明大概会削掉7%-8%的无效点 剔除的比例还算可以接受 20210312
 		if (get<1>(*iterPc) >= k_value_otsu) {
 			points_reduced.push_back(*iterPs);
 		}
