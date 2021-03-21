@@ -8,7 +8,7 @@ string Window_calib = "Corners_dected";
 int Calib_Cgyt(Mat InputOutputArray)
 {
 	//Í¼Ïñ¼ÓÔØÂ·¾¶
-	Source_Path[0] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_1.jpg";
+	Source_Path[0] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_4.jpg";
 	Source_Path[1] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_2.jpg";
 	Source_Path[2] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_3.jpg";
 	Source_Path[3] = "F:\\Pictures\\Test For Programming\\HIK12MP\\CalibImg_4.jpg";

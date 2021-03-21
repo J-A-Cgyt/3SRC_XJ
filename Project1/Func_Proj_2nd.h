@@ -69,6 +69,8 @@ Mat JiaoDian_SURF_CGYT(Mat Src1, Mat Src2); //SURF角点检测与计算
 
 vector<Point2f> subPix_pt(Mat Src); //在已有像素级角点检测结果的基础上细化，使用OpenCV自带的函数
 
+void pic_Move_Cgyt(const Mat& Src, Mat& Dst,const int& x,const int& y);
+
 #endif // !Features2nd
 
 

@@ -111,7 +111,7 @@ Mat JiaoDian_SURF_CGYT(Mat Src1, Mat Src2) //surf角点检测代码
 	temp1 = Src1.clone();
 	temp2 = Src2.clone();
 
-	Ptr<xfeatures2d::SurfFeatureDetector> Dect1_Surf1 = xfeatures2d::SURF::create(30000); //特征检测器
+	Ptr<xfeatures2d::SurfFeatureDetector> Dect1_Surf1 = xfeatures2d::SURF::create(3000); //特征检测器 国家地理两张图是30000
 	vector<KeyPoint> KeyPoints_1_Q, KeyPoints_2_T; //特征点容器
 
 	Mat descriptor1_Q, descriptor2_T; //描述子
@@ -231,7 +231,7 @@ Mat JiaoDian_SURF_CGYT(Mat Src1, Mat Src2) //surf角点检测代码
 	/*
 	对push_back()函数的理解，vector.push_back函数仅复制指针，不复制具体内容。
 	因此若使用同一变量多次赋不同值后 经push_back函数压入vector，
-	则会出现所有容器中的元素值均为最后一次赋值的结果。注意注意
+	则会出现所有容器中的元素值均为最后一次赋值的结果。注意注意 更正：仅对Mat这类包含指针的类 因实际数据的改动并未改动指针 push_back本身是压入副本的 20210203
 	*/
 
 	cout << Cord_buffer4 << endl << "原始坐标设定完毕" << endl;
@@ -261,7 +261,7 @@ Mat JiaoDian_SURF_CGYT(Mat Src1, Mat Src2) //surf角点检测代码
 		            Points_Pic[左下].at<double>(0)); //重叠部分起始(横)坐标即列序
 	//cout << start << endl;
 	int end = Src1.cols;
-	int Band_Width = end - start;
+	int Band_Width = end - start; //此处导致了img1和img2的相对位置必须是img1在左img2在右 但是能否用简单的绝对值解决问题还不好说
 	double Rate = 1;
 	for (int i = 0; i < img_trans2.rows; i++)
 	{
@@ -342,4 +342,30 @@ vector<Point2f> subPix_pt(Mat Src) //启动时间20200305 仅是对角点的检测，无描述子
 	waitKey(0);
 
 	return Corners;
+}
+
+//保证不旋转的平移图像函数 20210204测试通过
+void pic_Move_Cgyt(const Mat& Src,Mat& Dst,const int& x,const int& y) { 
+	Mat transMat = Mat::eye(Size(3, 3), CV_32FC1);
+
+	transMat.at<float>(0, 2) = x;
+	transMat.at<float>(1, 2) = y;
+	int xx(0), yy(0);
+	if (x < 0) {
+		printf("Please input distance x aixs(pix), value should be positive:");
+		scanf_s("%d", &xx);
+		transMat.at<float>(0, 2) = xx;
+	}
+	if (y < 0) {
+		printf("Please input distance y aixs(pix), value should be positive:");
+		scanf_s("%d", &yy);
+		transMat.at<float>(1, 2) = yy;
+	}
+	cv::Size res_Size;
+	res_Size.height = 2 * Src.rows;
+	res_Size.width = 2 * Src.cols;
+	warpPerspective(Src, Dst, transMat, res_Size);
+	printf("Transform done!\n");
+	imshow(window_name_f1, Dst);
+	waitKey(0);
 }

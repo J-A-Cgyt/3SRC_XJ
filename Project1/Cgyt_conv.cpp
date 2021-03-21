@@ -54,7 +54,6 @@ Mat Conv_Cgyt(Mat Src,int K_mod) //sobelÄ£°åÔËËã×ÔĞĞÊµÏÖ sobelËã×Ó 20200317£¬Ò²Ê
 				}
 			}
 
-
 			Chanel_Queue.push_back(res1);
 			Chanel_Queue.push_back(res2);
 			Chanel_Queue.push_back(Gard_angle);
