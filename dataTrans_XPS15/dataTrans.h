@@ -1,6 +1,7 @@
 #pragma once
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 struct Point_cgyt {  //这个顺便练一下之前学的那些？ 这个类也许不会使用
 	double x;

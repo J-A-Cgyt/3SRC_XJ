@@ -136,9 +136,9 @@ int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
 	//IP地址、协议族、端口设置
 	sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(2000);							   //端口
-	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);  //ip地址
-	//本机地址 192.168.137.1
+	serverAddr.sin_port = htons(5000);							   //端口
+	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);           //ip地址
+	//本机地址 192.168.137.2 XPS15
 
 	//连接建立
 	Result = connect(sClient, (sockaddr*)&serverAddr, sizeof(serverAddr));
@@ -148,19 +148,27 @@ int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
 		return -3;
 	}
 
-	size_t picStep = src.step[0];  //单行占据内存的空间 字节为单位
-	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char);
-	char* sizeBuffer = new char[sizeOf_size_t];
-	memcpy(sizeBuffer, &picStep, sizeOf_size_t);
-	send(sClient, sizeBuffer, sizeOf_size_t, 0);    //传输mat的step属性
+	size_t picInfo[3] = { 0 };
+	picInfo[0] = src.step;                                //单行占据内存的空间 字节为单位
+	picInfo[1] = src.rows * src.cols * src.elemSize();    //数据区块总共的占用字节数
+	picInfo[2] = src.type();
+	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char); 
+	char* sizeBuffer = new char[3 * sizeOf_size_t];
+	memcpy(sizeBuffer, picInfo, 3 * sizeOf_size_t);
+	send(sClient, sizeBuffer, 3 * sizeOf_size_t, 0);      //传输mat的step属性
+
+	//Sleep(1000);
 
 	size_t picSizeBytes = src.total() * src.elemSize();   //总字节大小 但是若要在另一端恢复数据 还需要知道单行大小
-	char* buffer = new char[picSizeBytes];  //如此以来 memcpy可能就不需要了
-	buffer = reinterpret_cast<char*>(src.data);  //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
+	//Mat的实际数据组织方式可能不是单个指针 在拷贝的时候可能就已经出错
+	char* buffer = new char[picSizeBytes];                //如此以来 memcpy可能就不需要了
+	buffer = reinterpret_cast<char*>(src.data);           //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
+	
+	char pin = buffer[4];
 	send(sClient, buffer, picSizeBytes, 0);
 
 	//释放空间并断开连接
 	closesocket(sClient);
-	delete[] buffer;
+	//delete[] buffer;
 	return 0;
 }
