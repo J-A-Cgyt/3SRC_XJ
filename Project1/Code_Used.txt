@@ -266,5 +266,31 @@ C++学习代码 202001025转移
 	waitKey(0);
 	Temp_Array.push_back(Temp_Buffer); //指针问题未明确，注意传输地址导致vector容器中内容一致的可能
 
+
+20210430转移
 	//亚像素边缘检测代码
 	Contours_subPix_result = SubPixel_Contours_Cgyt(Temp_Array[0], Contours_for_SubPixCont, 2.0);
+
+		//要不到时单独开一个线程用来传输 join还是要的 否则引用的内存区被清理了估计得报错 似乎不能应用俩参数 写几个就得几个 20210317暂时注释
+	//std::thread tSend = thread(ContoursSubpixSend,subpixPoints); 
+	//tSend.join();
+
+	//HistogramCGYT(SRC_2nd);
+	//FT_CGYT(SRC_2nd, Temp_Buffer);
+	//Filter_Freq(Temp_Buffer,4);
+	//Temp_Buffer = HarmonicMeanFilter(SRC_2nd, 2,1,1);
+
+//一下内容 20201025玩一下 C++习惯和新知识的练习试验
+
+	
+	//imshow(window_name, DST_2nd);
+	//waitKey(0);
+
+	//Temp_Buffer = CannyG_Cgyt(SRC_2nd);
+	//HoughLineG_Cgyt(Temp_Buffer);
+	//threshold(SRC_2nd, Temp_Buffer, 200, 255, THRESH_BINARY);
+	//Components_Connected_cgyt(Temp_Buffer);
+	//FaceG_cgyt(SRC_2nd);  //此函数GPU版本报错 不可用不知道啥没实现 CPU可行
+	//IrisDectH_GPU(SRC_2nd);
+	//ORBG_cgyt(SRC_2nd);
+	//SURFG_cgyt(SRC_2nd, Temp_Buffer); //surf的GPU版本配合代码，20200723注释

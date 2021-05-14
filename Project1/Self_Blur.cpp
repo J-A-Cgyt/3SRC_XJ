@@ -1,5 +1,8 @@
 #include "Func_Proj_2nd.h"
 #include <tuple>
+#include <algorithm>
+//SIMD头文件
+#include <immintrin.h>
 string window_name_f3 = "Demo_Result"; //结果显示窗
 
 //均值滤波器族需自行实现种类：几何均值、谐波均值、逆谐波均值 数字图像处理page203、204 
@@ -84,9 +87,151 @@ Mat HarmonicMeanFilter(Mat Src, int size,double n,int Flag) //正逆谐波均值滤波器
 	return dst;
 }
 
-//统计排序滤波器族需自行实现的种类：最大值、最小值滤波器，中点滤波，修正的alpha均值滤波器 数字图像处理page205-207
+//统计排序滤波器族需自行实现的种类：最大值、最小值滤波器，中点滤波，修正的alpha均值滤波器 数字图像处理page205-207 都以CV_8UC1作为类型要求 彩色的先放一放 算法原理有了应该就可以吧？新的算法从头开始应用SIMD可能会好一点
+void StatusFilter::statusBlur(int ksize, int operationType, const cv::Mat& Src, cv::Mat& Dst) {
+	if (ksize % 2 == 0) {
+		throw runtime_error("parameter 'ksize' must be odd");
+	}
+
+	//设12个线程试试
+	std::thread threadGroup[12];
+	int up = ksize / 2; int down = Src.rows - (ksize / 2);
+	int left = up; int right = Src.cols - (ksize / 2);
+	int stepCol = right / 12;
+
+	unsigned char* dstRowPtr = Dst.ptr(); dstRowPtr += 2 * Dst.elemSize();
+	size_t rowByteSize = Dst.step[0];
+
+	int A = left;
+	int B = left + stepCol;
+
+	switch (operationType)
+	{
+	case 1:
+		//const unsigned char* srcRowPtr = Src.ptr();  srcRowPtr += 2 * Src.elemSize();
+		for (int row = ksize / 2; row < Src.rows-(ksize/2); row++) {
+			for (int col = ksize / 2; col < Src.cols - (ksize / 2); col++) {
+				cv::Size Cord(row, col);
+				//Dst.at<uchar>(row, col) = findMedian(Src, Cord, ksize);
+				dstRowPtr[col] = findMedian(Src, Cord, ksize);
+			}
+			//srcRowPtr += rowByteSize;
+			dstRowPtr += rowByteSize;
+		}
+		break;
+	case 2:
+		/* 关于找不到可用重载函数 std::invoke C2672错误的解释
+		  原函数是引用传递参数，但是thread构造的时候不知道filter的参数是引用的，
+		  thread只会盲目地复制H1的值，而这个复制出来的值是const的类型，这与filter需要的参数类型不匹配，
+		  因为filter需要的是non-const的引用，因此报错。
+		  可以改成thread t(filter,ref(H1),200);
+		*/
+		for (int i = 0; i < 12; i++) {
+			threadGroup[i] = std::thread(StatusFilter::visitThroughMax, ksize, Src, ref(Dst), A, B);
+			A = B;
+			B = A + stepCol;
+		}
+		break;
+	case 3:
+		for (int i = 0; i < 12; i++) {
+			threadGroup[i] = std::thread(StatusFilter::visitThroughMin, ksize, Src, ref(Dst), A, B);
+			A = B;
+			B = A + stepCol;
+		}
+		break;
+	case 4:
+
+		break;
+	default:
+		throw runtime_error("operationType Error");
+		break;
+	}
+
+	/* 线程同步 */
+	for (int i = 0; i < 12; i++) {
+		threadGroup[i].join();
+	}
+
+	return;
+}
+
+void StatusFilter::visitThroughMax(int ksize, const cv::Mat& Src, cv::Mat& Dst,
+								   int left, int right) {
+	for (int row = ksize / 2; row < Src.rows - (ksize / 2); row++) {
+		for (int col = left; col < right; col++) {
+			cv::Size Cord(row, col);
+			Dst.at<uchar>(row, col) = findMax(Src, Cord, ksize);
+		}
+	}
+	return;
+}
+
+void StatusFilter::visitThroughMin(int ksize, const cv::Mat& Src, cv::Mat& Dst,
+	int left, int right) {
+	for (int row = ksize / 2; row < Src.rows - (ksize / 2); row++) {
+		for (int col = left; col < right; col++) {
+			cv::Size Cord(row, col);
+			Dst.at<uchar>(row, col) = findMin(Src, Cord, ksize);
+		}
+	}
+	return;
+}
+
+	//妈的单线程迭代也太慢了 主要是at过于慢
+unsigned char StatusFilter::findMedian(const cv::Mat& src, const cv::Size& pos, int ksize) {
+	if (ksize % 2 == 0) {
+		throw runtime_error("parameter 'ksize' must be odd");
+	}
+	int halfWidth = ksize / 2;
+
+	std::vector<unsigned char> temp(ksize*ksize);
+	auto iter = temp.begin();
+	for (int i = 0; i < ksize; i++) {
+		for (int j = 0; j < ksize; j++) {
+			*iter = src.at<uchar>(pos.width - ksize / 2 + j, pos.height - ksize / 2 + i);
+			iter++;
+		}
+	}
+
+	sort(temp.begin(), temp.end());
+	return temp[ksize*ksize / 2];
+}
+
+unsigned char StatusFilter::findMax(const cv::Mat& src, const cv::Size& pos, int ksize) {
+	if (ksize % 2 == 0) {
+		throw runtime_error("parameter 'ksize' must be odd");
+	}
+	int halfWidth = ksize / 2;
+	unsigned char temp(0x00);
+	for (int i = 0; i < ksize; i++) {
+		for (int j = 0; j < ksize; j++) {
+			if (src.at<uchar>(pos.width - ksize / 2 + j, pos.height - ksize / 2 + i)>temp) {
+				temp = src.at<uchar>(pos.width - ksize / 2 + j, pos.height - ksize / 2 + i);
+			}
+		}
+	}
+	return temp;
+}
+
+unsigned char StatusFilter::findMin(const cv::Mat& src, const cv::Size& pos, int ksize) {
+	if (ksize % 2 == 0) {
+		throw runtime_error("parameter 'ksize' must be odd");
+	}
+	int halfWidth = ksize / 2;
+	unsigned char temp(0xFF);
+	for (int i = 0; i < ksize; i++) {
+		for (int j = 0; j < ksize; j++) {
+			if (src.at<uchar>(pos.width - ksize / 2 + j, pos.height - ksize / 2 + i) < temp) {
+				temp = src.at<uchar>(pos.width - ksize / 2 + j, pos.height - ksize / 2 + i);
+			}
+		}
+	}
+	return temp;
+}
 
 //自适应滤波器族：自适应局部降低噪声滤波器，自适应中值滤波器 数字图像处理page208-211
+
+
 
 Mat Gaosi_双边(Mat Src) //高斯双边滤波与锐化，保持边缘的滤波 2019/11/14,从测试与积累项目移植
 {
@@ -706,3 +851,5 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 	//关于轮廓的评价 单纯的拟合没有用，需要有设计数据方可 能够总结的也就是一些几何参数和部分几何矩参数到这个层次 数据其实已经很少了
 	return points_reduced;
 }
+
+//第四套1元硬币直径25mm

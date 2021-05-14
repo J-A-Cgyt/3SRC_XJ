@@ -30,6 +30,30 @@ Mat GeoMeanFilter(Mat Src, int size); //几何均值滤波器 20201014
 
 Mat HarmonicMeanFilter(Mat Src, int size, double n, int Flag); //谐波均值滤波器 20201014
 
+//统计滤波器类相关定义 单线程迭代属实慢 真的慢 慢的一批 OPENCV牛逼
+enum OperationType {
+	MEDIAN = 1,  //中值
+	MAX = 2,     //最大值
+	MIN = 3,	 //最小值
+	MIDDLE = 4   //中点
+};
+
+class StatusFilter {
+
+public:
+	void statusBlur(int ksize, int operationType, const cv::Mat& Src, cv::Mat& Dst);
+
+private:
+	static void visitThroughMax(int ksize, const cv::Mat& Src, cv::Mat& Dst,
+							    int left, int right);
+	static void visitThroughMin(int ksize, const cv::Mat& Src, cv::Mat& Dst,
+								int left, int right);
+	static unsigned char findMedian(const cv::Mat& src, const cv::Size& pos, int ksize);
+	static unsigned char findMax(const cv::Mat& src, const cv::Size& pos, int ksize);
+	static unsigned char findMin(const cv::Mat& src, const cv::Size& pos, int ksize);
+};
+//统计滤波器类相关定义结束
+
 Mat Gaosi_双边(Mat Src); //高斯双边滤波与锐化，保持边缘的滤波 2019/11/14,从测试与积累项目移植
 
 Mat NLM_CGYT(Mat Src); //NLM，非局部均值滤波

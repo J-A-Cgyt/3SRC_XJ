@@ -52,23 +52,23 @@ protected:
 
 private: //卷积核设定
 	//sobel卷积核
-	cv::Mat Sobel_Zong = (cv::Mat_<char>(3, 3) << -1, -2, -1,
+	cv::Mat Sobel_Zong = (cv::Mat_<uchar>(3, 3) << -1, -2, -1,
 		0, 0, 0,
 		1, 2, 1);
-	cv::Mat Sobel_Heng = (cv::Mat_<char>(3, 3) << -1, 0, 1,
+	cv::Mat Sobel_Heng = (cv::Mat_<uchar>(3, 3) << -1, 0, 1,
 		-2, 0, 2,
 		-1, 0, 1);
 
 	//一阶梯度
-	cv::Mat Gard_Zong = (cv::Mat_<char>(3, 3) << -1, -1, -1,
+	cv::Mat Gard_Zong = (cv::Mat_<uchar>(3, 3) << -1, -1, -1,
 		0, 0, 0,
 		1, 1, 1);
-	cv::Mat Gard_Heng = (cv::Mat_<char>(3, 3) << -1, 0, 1,
+	cv::Mat Gard_Heng = (cv::Mat_<uchar>(3, 3) << -1, 0, 1,
 		-1, 0, 1,
 		-1, 0, 1);
 
 	//Laplace算子 四个方向
-	cv::Mat Laplace = (cv::Mat_<char>(3, 3) << -1, -1, -1,
+	cv::Mat Laplace = (cv::Mat_<uchar>(3, 3) << -1, -1, -1,
 		-1, 8, -1,
 		-1, -1, -1);
 

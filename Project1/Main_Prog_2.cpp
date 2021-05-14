@@ -69,18 +69,19 @@ int main()
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_D, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_C, IMREAD_GRAYSCALE);
 	cout << SRC_2nd.type();
 	if (!SRC_2nd.data)
 	{
 		cout << "读取失败" << endl;
 		return -1;
 	}
-	imshow(window_name, SRC_2nd);
-	waitKey(0);
+	cv::imshow(window_name, SRC_2nd);
+	cv::waitKey(0);
 	Temp_Array.push_back(SRC_2nd);  //Temp_Array[0];
 	Temp_Buffer = SRC_2nd.clone();
  
+#ifdef SUBPIX
 	//GaussianBlur(Temp_Buffer, Temp_Buffer, cv::Size(7, 7), 0);
 	Temp_Array.push_back(Temp_Buffer);
 
@@ -133,33 +134,11 @@ int main()
 	std::vector<cv::Point2d> subpixPoints;  //亚像素级的轮廓坐标点
 	subpixPoints = SubPixel_Contours_Cgyt(doubleSrc, selected_Contours[0], 3.0);  
 	//这个其实已经可以向高级主控传送检测结果了还是用TCP协议但是如何发送还是个问题 不过似乎有相应的网页看看先20210312 好像不能传诶
-	
-	//要不到时单独开一个线程用来传输 join还是要的 否则引用的内存区被清理了估计得报错 似乎不能应用俩参数 写几个就得几个 20210317暂时注释
-	//std::thread tSend = thread(ContoursSubpixSend,subpixPoints); 
-	//tSend.join();
-
-	//HistogramCGYT(SRC_2nd);
-	//FT_CGYT(SRC_2nd, Temp_Buffer);
-	//Filter_Freq(Temp_Buffer,4);
-	//Temp_Buffer = HarmonicMeanFilter(SRC_2nd, 2,1,1);
-	
-	//imshow(window_name, Temp_Buffer);
-	//waitKey(0)
-	;
-//一下内容 20201025玩一下 C++习惯和新知识的练习试验
-
-	
-	//imshow(window_name, DST_2nd);
-	//waitKey(0);
-
-	//Temp_Buffer = CannyG_Cgyt(SRC_2nd);
-	//HoughLineG_Cgyt(Temp_Buffer);
-	//threshold(SRC_2nd, Temp_Buffer, 200, 255, THRESH_BINARY);
-	//Components_Connected_cgyt(Temp_Buffer);
-	//FaceG_cgyt(SRC_2nd);  //此函数GPU版本报错 不可用不知道啥没实现 CPU可行
-	//IrisDectH_GPU(SRC_2nd);
-	//ORBG_cgyt(SRC_2nd);
-	//SURFG_cgyt(SRC_2nd, Temp_Buffer); //surf的GPU版本配合代码，20200723注释
+#endif
+	StatusFilter x;
+	x.statusBlur(5, OperationType::MIN, SRC_2nd, Temp_Buffer);
+	cv::imshow(window_name, Temp_Buffer);
+	cv::waitKey(0);
 
 	destroyAllWindows(); //销毁所有窗口，手动内存管理
 
