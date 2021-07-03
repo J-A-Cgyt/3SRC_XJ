@@ -34,8 +34,10 @@ string LoadPath_Msi_A = "F:\\Pictures\\Test For Programming\\噪声测试图像.png";
 
 string LoadPath_Msi_B("F:\\Pictures\\Test For Programming\\FreqFilterSrc.png");  
 string LoadPath_Msi_C = "F:\\Pictures\\Test For Programming\\1.jpg"; 
-string LoadPath_Msi_D("F:\\Pictures\\Test For Programming\\coins\\coin_6.bmp");
+string LoadPath_Msi_D("F:\\Pictures\\Test For Programming\\coins\\coin_2.bmp");
 
+//string SavePath_Msi_0("F:\\Pictures\\Test For Programming\\coins\\coin_2_thres54.jpg");
+//string SavePath_Msi_1("F:\\Pictures\\Test For Programming\\coins\\coin_2_thres73.jpg");
 /*-----------------------------------------------------------------------------------------------------------------------------------*/
 
 string window_name = "Demo_Result"; //结果显示窗
@@ -44,6 +46,7 @@ Mat SRC_2nd; //全局源图
 Mat DST_2nd; //全局输出图
 //clock_t Start, End;
 
+//#define SUBPIX 1
 
 //关于自制卷积函数的枚举类型说明
 enum Conv_cgyt
@@ -69,7 +72,7 @@ int main()
 	//namedWindow(window_name, WINDOW_AUTOSIZE);
 
 	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_C, IMREAD_GRAYSCALE);
+	SRC_2nd = imread(LoadPath_Msi_D, IMREAD_GRAYSCALE);
 	cout << SRC_2nd.type();
 	if (!SRC_2nd.data)
 	{
@@ -96,11 +99,13 @@ int main()
 	waitKey(0);
 
 	//OTSU之前最好弄个边缘检测的
-	//double otsu_value = threshold(SRC_2nd, Temp_Buffer, 0, 255, THRESH_OTSU);  //顺便把otsu的值记录一下 73 直接OTSU
-	double otsu_value = threshold(masked, Temp_Buffer, 0, 255, THRESH_OTSU);     //顺便把otsu的值记录一下 54 边缘强化OTSU
+	double otsu_value = threshold(SRC_2nd, Temp_Buffer, 0, 255, THRESH_OTSU);  //顺便把otsu的值记录一下 73 直接OTSU
+	//double otsu_value = threshold(masked, Temp_Buffer, 0, 255, THRESH_OTSU);     //顺便把otsu的值记录一下 54 边缘强化OTSU
 	threshold(SRC_2nd, Temp_Buffer, otsu_value, 255, THRESH_BINARY);
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
+	//保存图片用代码20210617
+	//imwrite(SavePath_Msi_1, Temp_Buffer);
 
 	std::vector<std::vector<cv::Point2i>> contours;								 //存一个附属图像吧，作为TCP发送的局部原始图像用于测试局部通信
 	findContours(Temp_Buffer, contours, RETR_EXTERNAL, CHAIN_APPROX_NONE);
@@ -135,11 +140,13 @@ int main()
 	subpixPoints = SubPixel_Contours_Cgyt(doubleSrc, selected_Contours[0], 3.0);  
 	//这个其实已经可以向高级主控传送检测结果了还是用TCP协议但是如何发送还是个问题 不过似乎有相应的网页看看先20210312 好像不能传诶
 #endif
+
+#ifndef SUBPIX
 	StatusFilter x;
 	x.statusBlur(5, OperationType::MIN, SRC_2nd, Temp_Buffer);
 	cv::imshow(window_name, Temp_Buffer);
 	cv::waitKey(0);
-
+#endif
 	destroyAllWindows(); //销毁所有窗口，手动内存管理
 
 	return 0;
