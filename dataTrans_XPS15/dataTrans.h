@@ -8,7 +8,7 @@ struct Point_cgyt {  //这个顺便练一下之前学的那些？ 这个类也许不会使用
 	double y;
 
 	//拷贝控制相关复习一边
-	Point_cgyt() :x(0), y(0) { };                              //默认构造函数
+	Point_cgyt() :x(0), y(0) { };                            //默认构造函数
 	Point_cgyt(double xx, double yy) :x(xx), y(yy) { };      //构造函数
 	Point_cgyt(const Point_cgyt &pt) :x(pt.x), y(pt.y) { };  //拷贝构造函数
 	Point_cgyt(Point_cgyt &&pt) :x(pt.x), y(pt.y) { };       //移动构造函数
@@ -21,3 +21,4 @@ int ContoursSubpixSend(const std::vector<cv::Point2d>& contoursSubpix, const cha
 
 int RoIMatSend(const cv::Mat& src, const char* ipAddr);
 
+int videoTrans(const char* ipAddr);                         //摄像头拍摄图像上传

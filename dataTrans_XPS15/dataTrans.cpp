@@ -8,13 +8,24 @@
 #include <vector>
 #include <fstream>  //文件流吧 此处的图像发送尽量避免使用OPENCV以免对象设备无相关环境导致读取出错
 #include <sstream>
-
+#include <thread>
+#include <conio.h>
 #include "dataTrans.h"
 
 #pragma comment(lib,"ws2_32.lib")  //此处加载了静态库
 #include <winsock2.h>
-
 #include <tuple>
+
+#define SECOND
+
+#define VIDEO_TRANS
+
+#ifdef VIDEO_TRANS
+    #include <opencv2/video/video.hpp>
+#endif // VIDEP_TRANS
+
+int transData(SOCKET &sClient, const cv::Mat &src); //根据建立的socket发送
+
 
 enum TransType {
 	CGYT_SUBPIX = 0x0,
@@ -106,12 +117,118 @@ int ContoursSubpixSend(const std::vector<cv::Point2d>& contoursSubpix, const cha
 
 int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
 
-	if (src.type() != CV_8UC1) {   //类型检查
-		throw std::runtime_error("only mat of type CV_8UC1 can be send");
+	if ((src.type() != CV_8UC1) && (src.type()!=CV_8UC3)) {   //类型检查
+		//throw std::runtime_error("only mat of type CV_8UC1 can be send");
+		printf("mat type error\n");
 		return -4;
 	}
 
 	//WinsSock 初始化
+	WORD wVwesionRequested;              //16bit字型变量 （WORD）
+	wVwesionRequested = MAKEWORD(2, 2);  //要求的库文件版本号，MAKEWORD宏将两个8bit上下拼成15bit，版本2.2
+	WSADATA wsaData;
+
+	int Result;
+	Result = WSAStartup(wVwesionRequested, &wsaData);  //库文件绑定指示函数，启动socket之前
+	if (Result != 0)
+	{
+		printf("WSAStartup() faild\n");
+		return -1;
+	}
+
+	// Socket创建
+	SOCKET sClient;
+	sClient = socket(AF_INET, SOCK_STREAM, 0);
+	if (sClient == INVALID_SOCKET)
+	{
+		WSACleanup();
+		printf("socket() faild\n");
+		return -2;
+	}
+	//IP地址、协议族、端口设置
+	sockaddr_in serverAddr;
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(5000);							   //端口
+	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);           //ip地址
+	//本机地址 192.168.137.2 XPS15
+
+	//连接建立
+	Result = connect(sClient, (sockaddr*)&serverAddr, sizeof(serverAddr));
+	if (Result == SOCKET_ERROR)
+	{
+		printf("连接失败");
+		return -3;
+	}
+
+#ifndef SECOND
+	size_t picInfo[3] = { 0 };
+	picInfo[0] = src.step;                                //单行占据内存的空间 字节为单位
+	picInfo[1] = src.rows * src.cols * src.elemSize();    //数据区块总共的占用字节数
+	picInfo[2] = src.type();
+	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char); 
+	char* sizeBuffer = new char[3 * sizeOf_size_t];
+	memcpy(sizeBuffer, picInfo, 3 * sizeOf_size_t);
+	send(sClient, sizeBuffer, 3 * sizeOf_size_t, 0);      //传输mat的step属性
+
+	//Sleep(1000);
+
+	size_t picSizeBytes = src.total() * src.elemSize();   //总字节大小 但是若要在另一端恢复数据 还需要知道单行大小
+	//Mat的实际数据组织方式可能不是单个指针 在拷贝的时候可能就已经出错
+	char* buffer = new char[picSizeBytes];                //如此以来 memcpy可能就不需要了
+	buffer = reinterpret_cast<char*>(src.data);           //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
+	
+	char pin = buffer[4];
+	send(sClient, buffer, picSizeBytes, 0);
+#endif // !SECOND
+
+#ifdef x
+	size_t picInfo[3] = { 0 };  //int->size_t转化应无损失
+	picInfo[0] = src.rows;
+	picInfo[1] = src.cols;
+	picInfo[2] = src.type();
+	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char);
+	char* sizeBuffer = new char[3 * sizeOf_size_t];
+	memcpy(sizeBuffer, picInfo, 3 * sizeOf_size_t);
+	send(sClient, sizeBuffer, 3 * sizeOf_size_t, 0);      //传输mat的信息
+
+	size_t picSizeBytes = src.total() * src.elemSize();   //总字节大小 但是若要在另一端恢复数据 还需要知道单行大小
+//Mat的实际数据组织方式可能不是单个指针 在拷贝的时候可能就已经出错
+	char* buffer = new char[picSizeBytes];                //如此以来 memcpy可能就不需要了
+	buffer = reinterpret_cast<char*>(src.data);           //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换 存在数据发送不完整的问题 可能转换是另外开一个线程？
+	//注意 buffer并未重新分配内存空间，他只是只想data区块的另一个指针而已，因此用外部指针释放Mat.data所有的实际内容，因此报错
+	std::thread transForm(memcpy, buffer, src.data, picSizeBytes);
+	transForm.join();
+	
+	//memcpy(buffer, src.data, picSizeBytes);
+	//Sleep(1);
+	
+	//char pin = buffer[4];
+	send(sClient, buffer, picSizeBytes, 0); 
+	/*
+	实验证明 send并不是一个串行执行的函数 它会在数据转换或内存拷贝还没执行完成的时候执行，导致数据发送不全
+	解决手段：在内存拷贝或类型转换后增加一行必须串行执行的代码
+	或者另开一个线程执行内存拷贝，并强制其完成 线程join以后方可执行后续代码 (此方法似乎是最可靠的)
+	对内存的操作似乎都是另开线程，赋值才行 赋值似乎也不是绝对可靠？
+	*/
+	//Sleep(1000)
+
+#endif //SECOND 第二种TCP协议的尝试 20210324START
+
+	transData(sClient, src);
+
+	//释放空间并断开连接
+	closesocket(sClient);
+	//delete[] sizeBuffer;
+	//buffer = nullptr;
+	//sizeBuffer = nullptr;
+	return 0;
+}
+
+int videoTrans(const char* ipAddr = "192.168.137.3") {
+	//增加摄像头capture的代码试试连续发送 在这之前先试试大图
+	bool flag(true);
+#ifdef VIDEO_TRANS
+		//WinsSock 初始化
 	WORD wVwesionRequested; //16bit字型变量 （WORD）
 	wVwesionRequested = MAKEWORD(2, 2);  //要求的库文件版本号，MAKEWORD宏将两个8bit上下拼成15bit，版本2.2
 	WSADATA wsaData;
@@ -148,27 +265,68 @@ int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
 		return -3;
 	}
 
-	size_t picInfo[3] = { 0 };
-	picInfo[0] = src.step;                                //单行占据内存的空间 字节为单位
-	picInfo[1] = src.rows * src.cols * src.elemSize();    //数据区块总共的占用字节数
-	picInfo[2] = src.type();
-	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char); 
-	char* sizeBuffer = new char[3 * sizeOf_size_t];
-	memcpy(sizeBuffer, picInfo, 3 * sizeOf_size_t);
-	send(sClient, sizeBuffer, 3 * sizeOf_size_t, 0);      //传输mat的step属性
+	cv::VideoCapture cap(0);
+	if (!cap.isOpened()) //若启动失败则结束程序
+	{
+		std::cout << "启动摄像头失败\n" << std::endl;
+		return -5;
+	}
 
-	//Sleep(1000);
+	char* buffer = new char[5];  //准备信号缓存
 
-	size_t picSizeBytes = src.total() * src.elemSize();   //总字节大小 但是若要在另一端恢复数据 还需要知道单行大小
-	//Mat的实际数据组织方式可能不是单个指针 在拷贝的时候可能就已经出错
-	char* buffer = new char[picSizeBytes];                //如此以来 memcpy可能就不需要了
-	buffer = reinterpret_cast<char*>(src.data);           //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
-	
-	char pin = buffer[4];
-	send(sClient, buffer, picSizeBytes, 0);
+	do {
+		cv::Mat frame;
+		bool isSucceed = cap.read(frame);
+		transData(sClient, frame);
+		if (_kbhit()) { flag = false; }
+		//Sleep(90);
+		//frame.release();
+		int L = recv(sClient, buffer, 5, 0);
+		if (L == 0)	{	break;	}
+	} while (flag);
+#endif
+	transData(sClient, cv::Mat(cv::Size(1,1),CV_8UC1));
 
 	//释放空间并断开连接
 	closesocket(sClient);
-	//delete[] buffer;
+
+	return 0;
+}
+
+int transData(SOCKET &sClient, const cv::Mat &src) {
+	size_t picInfo[3] = { 0 };  //int->size_t转化应无损失
+	picInfo[0] = src.rows;
+	picInfo[1] = src.cols;
+	picInfo[2] = src.type();
+	size_t sizeOf_size_t = sizeof(size_t) / sizeof(char);
+	char* sizeBuffer = new char[3 * sizeOf_size_t];
+	memcpy(sizeBuffer, picInfo, 3 * sizeOf_size_t);
+	send(sClient, sizeBuffer, 3 * sizeOf_size_t, 0);        //传输mat的信息 注意！recv和send都是对缓冲区进行操作 recv从缓冲区中读取数据
+	//Sleep(90);
+	size_t picSizeBytes = src.total() * src.elemSize();     //总字节大小 但是若要在另一端恢复数据 还需要知道单行大小
+//Mat的实际数据组织方式可能不是单个指针 在拷贝的时候可能就已经出错
+	char* buffer = new char[picSizeBytes];                  //如此一来memcpy可能就不需要了
+	//buffer = reinterpret_cast<char*>(src.data);           //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换 存在数据发送不完整的问题 可能转换是另外开一个线程？
+	//注意 buffer并未重新分配内存空间，他只是只想data区块的另一个指针而已，因此用外部指针释放Mat.data所有的实际内容，因此报错
+	std::thread transForm(memcpy, buffer, src.data, picSizeBytes);
+	transForm.join();
+
+	//memcpy(buffer, src.data, picSizeBytes);
+	//Sleep(1);
+
+	//char pin = buffer[4];
+	send(sClient, buffer, picSizeBytes, 0);
+	//Sleep(50);
+	/*
+	实验证明 send并不是一个串行执行的函数 它会在数据转换或内存拷贝还没执行完成的时候执行，导致数据发送不全
+	解决手段：在内存拷贝或类型转换后增加一行必须串行执行的代码
+	或者另开一个线程执行内存拷贝，并强制其完成 线程join以后方可执行后续代码 (此方法似乎是最可靠的)
+	对内存的操作似乎都是另开线程，赋值才行 赋值似乎也不是绝对可靠？
+	*/
+	//Sleep(1000);
+	delete[] sizeBuffer;
+	delete[] buffer;
+	sizeBuffer = nullptr;
+	buffer = nullptr;
 	return 0;
 }
