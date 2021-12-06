@@ -152,7 +152,7 @@ int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
 	sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(2000);							   //端口
-	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);  //ip地址
+	serverAddr.sin_addr.S_un.S_addr = inet_addr(ipAddr);           //ip地址
 	//本机地址 192.168.137.1
 
 	//连接建立
@@ -169,9 +169,9 @@ int RoIMatSend(const cv::Mat& src, const char* ipAddr = "192.168.137.2") {
 	memcpy(sizeBuffer, &picStep, sizeOf_size_t);
 	send(sClient, sizeBuffer, sizeOf_size_t, 0);    //传输mat的step属性
 
-	size_t picSizeBytes = src.total() * src.elemSize();   //总子节大小 但是若要在另一端恢复数据 还需要知道单行大小
-	char* buffer = new char[picSizeBytes];  //如此以来 memcpy可能就不需要了
-	buffer = reinterpret_cast<char*>(src.data);  //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
+	size_t picSizeBytes = src.total() * src.elemSize();   //总字节大小 但是若要在另一端恢复数据 还需要知道单行大小
+	char* buffer = new char[picSizeBytes];                //如此以来 memcpy可能就不需要了
+	buffer = reinterpret_cast<char*>(src.data);           //可能还是要memcpy？ 此处重新解释 用于无视数据真实信息的发送是最合适的 显式类型转换
 	send(sClient, buffer, picSizeBytes, 0);
 
 	//释放空间并断开连接

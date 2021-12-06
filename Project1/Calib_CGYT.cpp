@@ -1,6 +1,6 @@
 #include "Func_Proj_2nd.h"
 
-string Source_Path[10];
+string Source_Path[9];
 string Window_calib = "Corners_dected";
 
 /*用于摄像机标定的函数，总体感觉误差似乎比较大，不如matlab的标定结果更接近S10超广的标称参数，
@@ -8,29 +8,40 @@ string Window_calib = "Corners_dected";
 int Calib_Cgyt(Mat InputOutputArray)
 {
 	//图像加载路径（于XPS15 9550）
-	Source_Path[0] = "G:\\Pictures\\Test For Programming\\calb13\\1.jpg";
-	Source_Path[1] = "G:\\Pictures\\Test For Programming\\calb13\\2.jpg";
-	Source_Path[2] = "G:\\Pictures\\Test For Programming\\calb13\\3.jpg";
-	Source_Path[3] = "G:\\Pictures\\Test For Programming\\calb13\\4.jpg";
-	Source_Path[4] = "G:\\Pictures\\Test For Programming\\calb13\\5.jpg";
-	Source_Path[5] = "G:\\Pictures\\Test For Programming\\calb13\\6.jpg";
-	Source_Path[6] = "G:\\Pictures\\Test For Programming\\calb13\\7.jpg";
-	Source_Path[7] = "G:\\Pictures\\Test For Programming\\calb13\\8.jpg";
-	Source_Path[8] = "G:\\Pictures\\Test For Programming\\calb13\\9.jpg";
-	Source_Path[9] = "G:\\Pictures\\Test For Programming\\calb13\\10.jpg";
+	//Source_Path[0] = "G:\\Pictures\\Test For Programming\\calb13\\1.jpg";
+	//Source_Path[1] = "G:\\Pictures\\Test For Programming\\calb13\\2.jpg";
+	//Source_Path[2] = "G:\\Pictures\\Test For Programming\\calb13\\3.jpg";
+	//Source_Path[3] = "G:\\Pictures\\Test For Programming\\calb13\\4.jpg";
+	//Source_Path[4] = "G:\\Pictures\\Test For Programming\\calb13\\5.jpg";
+	//Source_Path[5] = "G:\\Pictures\\Test For Programming\\calb13\\6.jpg";
+	//Source_Path[6] = "G:\\Pictures\\Test For Programming\\calb13\\7.jpg";
+	//Source_Path[7] = "G:\\Pictures\\Test For Programming\\calb13\\8.jpg";
+	//Source_Path[8] = "G:\\Pictures\\Test For Programming\\calb13\\9.jpg";
+	//Source_Path[9] = "G:\\Pictures\\Test For Programming\\calb13\\10.jpg";
+
+	Source_Path[0] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp1.bmp";
+	Source_Path[1] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp3.bmp";
+	Source_Path[2] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp5.bmp";
+	Source_Path[3] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp7.bmp";
+	Source_Path[4] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp9.bmp";
+	Source_Path[5] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp10.bmp";
+	Source_Path[6] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp11.bmp";
+	Source_Path[7] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp12.bmp";
+	Source_Path[8] = "C:\\Users\\CGYT_LOCAL\\OneDrive\\Pictures\\Test For Programming\\subpix_calib_20211129\\calib_subp13.bmp";
+
 
 	//窗口展示
 	namedWindow(Window_calib, WINDOW_NORMAL);
 	
 	//图像读取
 	vector<Mat> Src_img;
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 9; i++)
 	{
 		Src_img.push_back(imread(Source_Path[i], IMREAD_GRAYSCALE));
 	}
-	cv::Size ChessboardSize = Size(9, 6);   //棋盘格格子数
-	vector<vector<Point2f>> Corners_queue;  //检测所得的图像点序列组
-	vector<Point2f> Corners;  //单幅图像测得图像点暂存
+	cv::Size ChessboardSize = Size(11, 8);   //棋盘格格子数
+	vector<vector<Point2f>> Corners_queue;   //检测所得的图像点序列组
+	vector<Point2f> Corners;                 //单幅图像测得图像点暂存
 
 	//亚像素角点参数设定
 	cv::Size Window_size = Size(5, 5);
@@ -43,15 +54,15 @@ int Calib_Cgyt(Mat InputOutputArray)
 		0.01);  //最小精度
 	
 	//检测循环
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 9; i++)
 	{
-		bool ifFound = findChessboardCorners(Src_img[0], ChessboardSize, Corners);
+		bool ifFound = findChessboardCorners(Src_img[i], ChessboardSize, Corners);
 		if (ifFound = false)
 		{
 			cout << "find corners failed" << endl;
 			return -2;
 		}
-		cornerSubPix(Src_img[0], Corners, Window_size, Zone_0, Criteria_cgyt);
+		cornerSubPix(Src_img[i], Corners, Window_size, Zone_0, Criteria_cgyt);
 		Corners_queue.push_back(Corners);
 	}
 	//角点绘制展示
@@ -78,14 +89,14 @@ int Calib_Cgyt(Mat InputOutputArray)
 			Cord_WordQueue.push_back(Cord_Temp);
 		}
 	}
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 9; i++)
 	{
 		Cord_world.push_back(Cord_WordQueue);
 	}
 
 	//摄像机标定结果参数组
 	Mat K_CameraMatrix = Mat(3, 3, CV_32FC1, Scalar::all(0));  //摄像机内参矩阵K
-	Mat distortion = Mat(1, 5, CV_32FC1, Scalar::all(0));  //摄像机畸变参数，共5个
+	Mat distortion = Mat(1, 5, CV_32FC1, Scalar::all(0));      //摄像机畸变参数，共5个
 	vector<Mat> RotationV; //图像旋转向量
 	vector<Mat> MoveV;  //图像平移向量
 
@@ -97,6 +108,11 @@ int Calib_Cgyt(Mat InputOutputArray)
 
 	cout << K_CameraMatrix << endl;
 
+	cout << MoveV[0] << endl;
+	cout << MoveV[1] << endl;
+	cout << MoveV[2] << endl;
+	cout << MoveV[3] << endl;
+	cout << MoveV[4] << endl;
 //畸变矫正测试
 	Mat res;
 	undistort(map, res, K_CameraMatrix, distortion);

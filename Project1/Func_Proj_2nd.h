@@ -25,6 +25,7 @@ using namespace std;
 using namespace cv;
 
 #ifndef Self_Blur //自行建立的滤波方法
+#define Self_Blur
 
 Mat GeoMeanFilter(Mat Src, int size); //几何均值滤波器 20201014
 
@@ -75,8 +76,14 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> Contours, double t
 #endif // !Self_Blur
 
 #ifndef Pre_Proc
+#define Pre_Proc
 
 Mat Thershold_区域(Mat Src); //区域阈值
+
+Mat Threshold_local(const Mat& Src, 
+                    unsigned int ksize,
+                    unsigned int a,
+                    unsigned int b);  //局部阈值
 
 Mat FT_CGYT(Mat Src,Mat &MiddleRes); //傅里叶变换
 
@@ -97,6 +104,7 @@ Mat MoHu_HuiDuBianHuan(Mat Src, int MT); //多线程版
 #endif // !Pre_Proc
 
 #ifndef Features2nd
+#define Features2nd
 
 Mat FAST_dect_Cgyt(Mat Src1, Mat Src2); //FAST角点检测
 
@@ -124,6 +132,7 @@ int HoughLineG_Cgyt(Mat Src_edge);
 
 
 #ifndef buffer  //这个区域用暂存文件内在主函数下定义的临时试验函数
+#define buffer
 
 int TrackBar_cgyt_canny(int, char** argv);
 
@@ -137,11 +146,19 @@ Mat WaveLetHarrR_CGYT(Mat Src, int LevelCount);//小波分解结果合并
 
 Mat GPU_func_study(Mat Src1, Mat Src2);
 
-int SURFG_cgyt(Mat Src1, Mat Src2);  //SURF的GPU版本，现在这个专利保护期已过，可以随便用了
+int SURFG_cgyt(Mat Src1, Mat Src2);          //SURF的GPU版本，现在这个专利保护期已过，可以随便用了
 
 #endif // !buffer
 
+#ifndef templateMatching
+#define templateMatching
+
+int template_matching_test();
+
+#endif
+
 #ifndef Calc
+#define Calc
 
 void HistogramCGYT(Mat Src);
 

@@ -47,6 +47,7 @@ Mat DST_2nd; //全局输出图
 //clock_t Start, End;
 
 //#define SUBPIX 1
+//#define MEAN_VAR_CAL 1
 
 //关于自制卷积函数的枚举类型说明
 enum Conv_cgyt
@@ -66,23 +67,24 @@ enum Iris_dect
 
 int main()
 {
-	std::vector<Mat> Temp_Array;
+	//20210924暂时注释
+	//std::vector<Mat> Temp_Array;
 	Mat Temp_Buffer;
-	namedWindow(window_name, WINDOW_NORMAL);
-	//namedWindow(window_name, WINDOW_AUTOSIZE);
+	//namedWindow(window_name, WINDOW_NORMAL);
+	////namedWindow(window_name, WINDOW_AUTOSIZE);
 
-	//原始图像组读取	
-	SRC_2nd = imread(LoadPath_Msi_D, IMREAD_GRAYSCALE);
-	cout << SRC_2nd.type();
-	if (!SRC_2nd.data)
-	{
-		cout << "读取失败" << endl;
-		return -1;
-	}
-	cv::imshow(window_name, SRC_2nd);
-	cv::waitKey(0);
-	Temp_Array.push_back(SRC_2nd);  //Temp_Array[0];
-	Temp_Buffer = SRC_2nd.clone();
+	////原始图像组读取	
+	//SRC_2nd = imread(LoadPath_Msi_D, IMREAD_GRAYSCALE);
+	//cout << SRC_2nd.type();
+	//if (!SRC_2nd.data)
+	//{
+	//	cout << "读取失败" << endl;
+	//	return -1;
+	//}
+	//cv::imshow(window_name, SRC_2nd);
+	//cv::waitKey(0);
+	//Temp_Array.push_back(SRC_2nd);  //Temp_Array[0];
+	//Temp_Buffer = SRC_2nd.clone();
  
 #ifdef SUBPIX
 	//GaussianBlur(Temp_Buffer, Temp_Buffer, cv::Size(7, 7), 0);
@@ -141,13 +143,27 @@ int main()
 	//这个其实已经可以向高级主控传送检测结果了还是用TCP协议但是如何发送还是个问题 不过似乎有相应的网页看看先20210312 好像不能传诶
 #endif
 
-#ifndef SUBPIX
+#ifdef STATUS_FILTER
 	StatusFilter x;
 	x.statusBlur(5, OperationType::MIN, SRC_2nd, Temp_Buffer);
 	cv::imshow(window_name, Temp_Buffer);
 	cv::waitKey(0);
 #endif
-	destroyAllWindows(); //销毁所有窗口，手动内存管理
+
+#ifdef MEAN_VAR_CAL
+	double mean = 0.0f;
+	double var  = 0.0f;
+	//局部均值与方差计算测试 20210915
+	int sts = localMeanVarCalc(SRC_2nd, 1234, 1111, 3, &mean, &var);
+
+#endif
+
+	//模板匹配学习 20210924
+	//template_matching_test();
+	Calib_Cgyt(Temp_Buffer);
+
+
+	//destroyAllWindows(); //销毁所有窗口，手动内存管理
 
 	return 0;
 }

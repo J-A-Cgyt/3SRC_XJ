@@ -8,15 +8,66 @@ string window_name_f2 = "Demo_Result"; //½á¹ûÏÔÊ¾´°
 Mat Thershold_ÇøÓò(Mat Src)
 {
 	//×Ô´ø×ÔÊÊÓ¦ãĞÖµ²ÎÊı×é
-	double Max_Value = 255;  //×î´óÖµ
+	double Max_Value = 255;   //×î´óÖµ
 	int Block_Size = 159;     //Çø¿é³ß´ç£¨ÏñËØÖµ£©
-	int C = 5;              //¾ùÖµ¼ÆËãÒÔºóãĞÖµµÄÆ«ÒÆÁ¿ £¨-C£©
+	int C = 5;                //¾ùÖµ¼ÆËãÒÔºóãĞÖµµÄÆ«ÒÆÁ¿ £¨-C£©
 
 	Mat Dst;
 	adaptiveThreshold(Src, Dst, Max_Value, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, Block_Size, C);
 
 	return Dst;
 }
+
+//DIP¾Ö²¿·½²îºÍ¾ùÖµ¼ÆËããĞÖµµÄÊµÏÖº¯Êı20210918 ¼°Æä¹¤¾ßº¯Êı----------------------------------------------------------------------------
+//ÊéÉÏ¹«Ê½ÖĞµÄ·Ç¸º³£ÊıÊÇ·ñ×÷Îª²ÎÊı´«Èë£¿ a£¬bÊéÖĞËµ×÷Îª
+Mat Threshold_local(const Mat& Src,
+					unsigned int ksize, 
+					unsigned int a, 
+					unsigned int b) 
+{
+	//ÀàĞÍ¼ì²é
+	if (Src.type() != CV_8UC1) { 
+		printf("Mat type error! only CV_8UC1 is accepted.\n");
+		return Mat();
+	}
+
+	Mat res = Src.clone();
+
+	//Êı¾İÍ·Ö¸ÕëÓëĞĞÍ·Ö¸Õë ÔİÊ±Ö»¿¼ÂÇ8UC1
+	//unsigned char* data_src = Src.data;
+	unsigned char* data_dst = res.data;
+
+	//unsigned char* row_head_src = nullptr;
+	unsigned char* row_head_dst = nullptr;
+
+	double mean = 0.0f;             //¾ùÖµ
+	double var  = 0.0;              //·½²î
+	double threshold_local = 0.0f;  //¾Ö²¿ãĞÖµ
+	int sts;                        //×´Ì¬±äÁ¿
+
+	//Ñ­»·
+	for (int r = 0; r < Src.rows; r++) {
+		//ĞĞÍ·¼ÆËã
+		//row_head_src = data_src + Src.step[0] * r;
+		row_head_dst = data_dst + res.step[0] * r;
+
+		for (int c = 0; c < Src.cols; c++) {
+
+
+			//µ±Ç°Î»ÖÃ·½²îºÍ¾ùÖµ¼ÆËã
+			sts = localMeanVarCalc(Src, r, c, ksize, &mean, &var);
+			//¾Ö²¿ãĞÖµ¼ÆËã
+			threshold_local = a * mean + b * var;
+
+			//µ±Ç°Î»ÖÃ¸³Öµ ³¬¹ı¾Í°×Ğ¡ÓÚ¾ÍºÚ
+			row_head_dst[c] > threshold_local ? 0xff : 0;
+
+		}
+	}
+
+	return res;
+}
+//¾Ö²¿·½²î¼°¹¤¾ßº¯Êı½áÊø-ºóÀ´Ò³Ã»Ğ´Ê²Ã´¹¤¾ßº¯Êı-------------------------------------------------------------------------------------------------------------
 
 //OTSUµÄÔ­ÀíºÍÊµÏÖ´úÂë»¹ÊÇÒªÅªÒ»ÏÂ20210307 emmmºÃÏñÖ±½ÓÓÃ cv::threshold¾ÍĞĞ Èç¹ûÒªÔÚÖĞ¼ä²å´úÂë ¿ÉÄÜ»¹ÊÇµÃ×Ô¼ºÊµÏÖ²ÅĞĞ
 
@@ -43,7 +94,7 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //Ôö¼ÓÒ»¸öÒıÓÃÓÃÓÚµ¼³öÆµÓòÂË²¨µÄËØ²Ä
 	Mat FT_src;
 	merge(mForFourier, 2, FT_src); //Ô´¾ØÕóÍ¨µÀºÏ²¢
 
-	dft(FT_src, FT_res); //FT_resµÄÁ½¸öÍ¨µÀ·Ö±ğÎª±ä»»½á¹ûµÄÊµ²¿ºÍĞé²¿ ÒòÎ´ÉáÆúÈÎºÎÊı¾İ£¬ËùÒÔÕâÀïµÄ½á¹û°üº¬ÁË·ùÖµÓëÏà½Ç£¬²¢Î´ËğÊ§Êı¾İ£¬¸ù¾İ´Ë»¹Ô­µÄ½á¹ûÓ¦¸ÃÒ²ÊÇÍêÈ«Ò»ÑùµÄ
+	dft(FT_src, FT_res);        //FT_resµÄÁ½¸öÍ¨µÀ·Ö±ğÎª±ä»»½á¹ûµÄÊµ²¿ºÍĞé²¿ ÒòÎ´ÉáÆúÈÎºÎÊı¾İ£¬ËùÒÔÕâÀïµÄ½á¹û°üº¬ÁË·ùÖµÓëÏà½Ç£¬²¢Î´ËğÊ§Êı¾İ£¬¸ù¾İ´Ë»¹Ô­µÄ½á¹ûÓ¦¸ÃÒ²ÊÇÍêÈ«Ò»ÑùµÄ
 	MiddleRes = FT_res.clone(); //°üº¬Êµ²¿ÓëĞé²¿Mat Í¨µÀÎªCV_32FC2 ×¢Òâ£¬´Ë´¦µÄÍ¼Ïñ²¢Î´ÖØºÏÖĞĞÄÔ­µã£¨ÖĞĞÄ»¯£©
 
 	vector<Mat> channels_res;
@@ -95,7 +146,7 @@ Mat FT_CGYT(Mat Src,Mat &MiddleRes) //Ôö¼ÓÒ»¸öÒıÓÃÓÃÓÚµ¼³öÆµÓòÂË²¨µÄËØ²Ä
 	//mAmplitude.copyTo(Location_rev );
 
 	return Location_rev; //Òò×ø±êÖá±ä»¯ĞèÖĞĞÄ»¯ºó·½¿É½øĞĞÂË²¨²Ù×÷£¬ÂËÍêÒÔºóÔÙ»»»ØÀ´£¨»¹ÊÇµÃ¿´OpenCV×Ô¼ºµÄÊµÏÖ·½·¨£©£¬ÆµÓòÂË²¨¿ÉÒÔÔÙĞ´¸öÀàÁË
-	//·ùÖµÍ¼²¢Î´´ú±íÈ«²¿ĞÅÏ¢£¬ÈôÒª½øĞĞÆµÓòÂË²¨£¬Ôò½¨Òé¶ÔÊµ²¿ºÍĞé²¿Í¬Ê±ÂË²¨£¬°´ÀíËµ±£Ö¤Ïà½Ç²»±ä£¨ÁãÏàÒÆ£©µÄÂË²¨Æ÷Ó¦ÊÇÒ»¸ö´¿ÊµÊı¾ØÕó
+	         //·ùÖµÍ¼²¢Î´´ú±íÈ«²¿ĞÅÏ¢£¬ÈôÒª½øĞĞÆµÓòÂË²¨£¬Ôò½¨Òé¶ÔÊµ²¿ºÍĞé²¿Í¬Ê±ÂË²¨£¬°´ÀíËµ±£Ö¤Ïà½Ç²»±ä£¨ÁãÏàÒÆ£©µÄÂË²¨Æ÷Ó¦ÊÇÒ»¸ö´¿ÊµÊı¾ØÕó
 }
 
 //ÏÖÔÚ¹ıÀ´ÔÙ°ÑÆµÓòÂË²¨²¹ÉÏ£¬ÂË²¨Æ÷Ä£°å¿´¿´ÈçºÎÉú³É ÕâÓ¦¸ÃÊÇÖ÷ÒªµÄ£¬¶ÔÓ¦µãÎ»Ïà³ËµÄ²Ù×÷µ½Ò²»¹ĞĞ£¬¾ÍÊÇÏñËØ¶àÁË¾Í¿¼ÂÇÓÃGPUÊµÏÖ°Ñ£¬ÌıËµCUDA¼¯³ÉÁËFFT£¿
@@ -536,8 +587,6 @@ Mat MoHu_HuiDuBianHuan(Mat Src)  //ËãÁËĞ´Ê²Ã´¶àÏß³Ì ¸ÄÔìÒ²¾ÍÊÇ¶à¸öº¯ÊıµÄÊÂÇé ¶àÏ
 Mat MoHu_HuiDuBianHuan(Mat Src,int MT)
 {
 	const int NumOfThreads = 8;
-
-
 
 	if (MT == 1)
 	{

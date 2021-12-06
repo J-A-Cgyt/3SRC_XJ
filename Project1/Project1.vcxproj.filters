@@ -54,6 +54,9 @@
     <ClCompile Include="DataTransTCP.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="tamplateMatching.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Func_Proj_2nd.h">

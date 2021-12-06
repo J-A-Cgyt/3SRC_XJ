@@ -133,6 +133,7 @@
     <ClCompile Include="MultiThread.cpp" />
     <ClCompile Include="Pre_proc.cpp" />
     <ClCompile Include="Self_Blur.cpp" />
+    <ClCompile Include="tamplateMatching.cpp" />
     <ClCompile Include="WaveLet2D.cpp" />
   </ItemGroup>
   <ItemGroup>
