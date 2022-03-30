@@ -70,7 +70,7 @@ Point3f IrisDect(Mat Src,int method)
 		vector<Point> IrisContour;	
 		Moments Mu;
 		float Radius; //拟合圆的半径
-		float Pi = 3.1415926; //圆周率
+		float Pi = 3.1415926f; //圆周率
 		int index;
 		findContours(tempB2, Contours, RETR_EXTERNAL, CHAIN_APPROX_NONE);		
 		cvtColor(Src, tempB1, COLOR_GRAY2BGR);
@@ -83,7 +83,7 @@ Point3f IrisDect(Mat Src,int method)
 			//cout << Mu.m20 << "," << i << endl;
 			if (Mu.nu11 < 0.0001)
 			{
-				if (Contours[i].size() > 600 & Contours[i].size() < 800)
+				if (Contours[i].size() > 600 && Contours[i].size() < 800)
 				{
 					index = i;
 					break;

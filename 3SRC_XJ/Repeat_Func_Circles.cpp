@@ -64,12 +64,16 @@ vector<Vec3f> Hough_circle_Class(Mat src, Mat Map, Hough_Param Param) //类化参数
 	//霍夫圆检测
 	tempA = src.clone();
 
-	HoughCircles(tempA, Circles, 
-		Param.Hough_Method, 
-		Param.dp, 
-		Param.mindist, 
-		Param.Param1, Param.Param2, 
-		Param.minRadius, Param.maxRadius);
+	HoughCircles(tempA,
+		         Circles,
+		         Param.Hough_Method,
+		         Param.dp,
+		         Param.mindist,
+		         Param.Param1,
+		         Param.Param2,
+		         Param.minRadius,
+		         Param.maxRadius);
+
 	/*此处需要有对检测的特征进行筛选的代码，针对不同对象需要设置不同的阈值参数*/
 
 	return Circles;

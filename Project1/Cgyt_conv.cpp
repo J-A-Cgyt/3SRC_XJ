@@ -6,31 +6,31 @@ Mat Conv_Cgyt(Mat Src,int K_mod) //sobelÄ£°åÔËËã×ÔĞĞÊµÏÖ sobelËã×Ó 20200317£¬Ò²Ê
 {
 	Mat res1, res2;
 	//sobel
-	Mat Sobel_Zong = (Mat_<char>(3, 3) << -1, -2, -1,
+	static Mat Sobel_Zong = (Mat_<char>(3, 3) << -1, -2, -1,
 										   0,  0,  0,
 										   1,  2,  1);
-	Mat Sobel_Heng = (Mat_<char>(3, 3) << -1, 0, 1,
+	static Mat Sobel_Heng = (Mat_<char>(3, 3) << -1, 0, 1,
 										  -2, 0, 2,
 										  -1, 0, 1);
-	Mat Sobel_P45 = (Mat_<char>(3, 3) << -2, -1, 0,
+	static Mat Sobel_P45 = (Mat_<char>(3, 3) << -2, -1, 0,
 										 -1, 0, -1,
 										 0, -1, -2);
-	Mat Sobel_N45 = (Mat_<char>(3, 3) << 0, -1, -2,
+	static Mat Sobel_N45 = (Mat_<char>(3, 3) << 0, -1, -2,
 										-1, 0, -1,
 										-2, -1, 0);
 	//Ò»½×Ìİ¶È
-	Mat Gard_Zong = (Mat_<char>(3, 3) << -1, -1, -1,
+	static Mat Gard_Zong = (Mat_<char>(3, 3) << -1, -1, -1,
 										  0,  0,  0,
 										  1,  1,  1);
-	Mat Gard_Heng = (Mat_<char>(3, 3) << -1, 0, 1,
+	static Mat Gard_Heng = (Mat_<char>(3, 3) << -1, 0, 1,
 										 -1, 0, 1,
 										 -1, 0, 1);
 	
 	//LaplaceËã×Ó
-	Mat Laplace8 = (Mat_<char>(3, 3) << -1, -1, -1,
+	static Mat Laplace8 = (Mat_<char>(3, 3) << -1, -1, -1,
 									   -1, 8, -1,
 									   -1, -1, -1);
-	Mat Laplace4 = (Mat_<char>(3, 3) << 0, -1, 0,
+	static Mat Laplace4 = (Mat_<char>(3, 3) << 0, -1, 0,
 									   -1, 4, -1,
 										0, -1, 0);
 

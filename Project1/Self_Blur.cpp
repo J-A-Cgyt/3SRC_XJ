@@ -1,4 +1,5 @@
 #include "Func_Proj_2nd.h"
+#include "MathCgyt.h"
 #include <tuple>
 #include <algorithm>
 //SIMD头文件
@@ -120,7 +121,8 @@ void StatusFilter::statusBlur(int ksize, int operationType, const cv::Mat& Src, 
 		}
 		break;
 	case 2:
-		/* 关于找不到可用重载函数 std::invoke C2672错误的解释
+		/* 
+		  关于找不到可用重载函数 std::invoke C2672错误的解释
 		  原函数是引用传递参数，但是thread构造的时候不知道filter的参数是引用的，
 		  thread只会盲目地复制H1的值，而这个复制出来的值是const的类型，这与filter需要的参数类型不匹配，
 		  因为filter需要的是non-const的引用，因此报错。
@@ -524,8 +526,9 @@ vector<Point2d> SubPixel_Contours_Cgyt(Mat Src, vector<Point> contour)
 
 //边缘参数计算流程
 	//计算参数声明 h2,h1为灰度，sigma，s为中间参数，P_1，P_2为灰度值h1，h2所占面积的比例有关系P_1+P_2=1
-	int h2;double sigma, S_Cgyt;
-	int h1; //double Rho, Theta;
+	double sigma, S_Cgyt;
+	//int h2;
+	//int h1; //double Rho, Theta;
 	double alpha;//中间参量
 
 	vector<double> P_1, P_2,P; 

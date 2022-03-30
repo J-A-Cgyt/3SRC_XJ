@@ -1,16 +1,18 @@
 //用于纯数学计算的函数实现 对应头文件MathCgyt.h
 #include "Func_Proj_2nd.h"
+#include "MathCgyt.h"
 
 #if MathActivate == 1
 
-//第一个写个关于Zernike矩的计算
+//第一个写个关于Zernike矩的计算 MATLAB已实现 无需再C++中计算
 double JingXiang_R_n_m(unsigned int n, unsigned int m, double rho)
 {
 	if (n <= m)
 	{
 		cout << "n<=m is not allowed" << endl;
-		return 0xffffffffffffffff;
+		return 0xffffffff;
 	}
+	return 0;
 }
 
 //阶乘 输入参数必须是int
@@ -167,5 +169,93 @@ int localMeanVarCalc(const Mat           &src,
 
 	return 0;                                                   //成功完成
 }
+
+
+/**************************************************************************************************
+*  看来还得要一个最小二乘拟合圆的C++版本
+*      contour      -I        拟合的亚像素样本点集
+*      circle_info  -O        输出的圆信息 x:中心横坐标 y:中心纵坐标 z:半径
+*      error        -O        输出的拟合误差
+*  返回值：参与拟合的点数量
+*  20211210测试通过 对比霍夫变换还是有比较好的结果，不用设置那么多参数
+**************************************************************************************************/
+int minSqureFitCircle(const std::vector<cv::Point2d>& contour,
+      	              cv::Point3d&                    circle_info,
+	                  double&                         error) {
+
+	circle_info.x = 0.0f;         //圆心x
+	circle_info.y = 0.0f;         //圆心y
+	circle_info.z = 0.0f;         //半径
+
+	//中间变量1(求和操作) 以下标识符均省略sigma求和符号
+	double x   = 0.0f;                  // Σ(x)
+	double y   = 0.0f;                  // Σ(y)
+	double x2  = 0.0f;                  // Σ(x*x)
+	double xy  = 0.0f;                  // Σ(x*y)
+	double y2  = 0.0f;                  // Σ(y*y)
+	double x3  = 0.0f;                  // Σ(x*x*x)
+	double x2y = 0.0f;                  // Σ(x*x*y)
+	double xy2 = 0.0f;                  // Σ(x*y*y)
+	double y3  = 0.0f;                  // Σ(y*y*y)
+
+	size_t n = contour.size();          //样本点数量
+
+	double C = 0.0f, D = 0.0f, E = 0.0f, G = 0.0f, H = 0.0f;
+	double a = 0.0f, b = 0.0f, c = 0.0f;
+
+	//计算上述循环
+	for (size_t i = 0; i < n; i++) {
+		x += contour[i].x;
+		y += contour[i].y;
+
+		x2 += contour[i].x * contour[i].x;
+		xy += contour[i].x * contour[i].y;
+		y2 += contour[i].y * contour[i].y;
+
+		x3  += contour[i].x * contour[i].x * contour[i].x;
+		x2y += contour[i].x * contour[i].x * contour[i].y;
+		xy2 += contour[i].x * contour[i].y * contour[i].y;
+		y3  += contour[i].y * contour[i].y * contour[i].y;
+	}
+
+	C = n * x2 - x * x;
+	D = n * xy - x * y;
+	E = n * x3 + n * xy2 - (x2 + y2) * x;
+	G = n * y2 - y * y;
+	H = n * y3 + n * x2y - (x2 + y2) * y;
+
+	a = (H*D - E * G) / (C*G - D * D);
+	b = (H*C - E * D) / (D*D - G * C);
+	c = -(a*x + b * y + x2 + y2) / n;
+
+	circle_info.x = -a * 0.5;
+	circle_info.y = -b * 0.5;
+	circle_info.z = sqrt(a * a + b * b - 4 * c) * 0.5;
+
+	return (int)n;
+}
+
+
+/**************************************************************************************************
+*  要不要再整一个RANSAC拟合圆的？
+*      contour      -I        拟合的亚像素样本点集
+*      circle_info  -O        输出的圆信息 x:中心横坐标 y:中心纵坐标 z:半径
+*      error        -O        输出的拟合误差
+*  返回值：参与拟合的点数量
+*
+**************************************************************************************************/
+int ransacFitCircle(const std::vector<cv::Point2d>& contour,
+	                cv::Point3d&                    circle_info,
+	                double&                         error) 
+{
+	circle_info.x = 0.0f;         //圆心x
+	circle_info.y = 0.0f;         //圆心y
+	circle_info.z = 0.0f;         //半径
+
+
+
+	return 0;
+}
+
 
 #endif

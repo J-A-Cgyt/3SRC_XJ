@@ -111,22 +111,22 @@ int ORBG_cgyt(Mat Src)
 //surf的角点检测，带匹配但不合成 关于CUDEV模块的问题，很有可能要使用，原因是CUDA不再支持2.0架构（可能是计算能力）。等真的要用的时候，在按照网上的办法重新编译试试吧
 int SURFG_cgyt(Mat Src1,Mat Src2)
 {
-	cuda::GpuMat Src1G, Src2G;  //显存图像
-	cuda::GpuMat KPsG1, KPsG2;  //显存角点存放
-	vector<KeyPoint> KPsC1, KPsC2;  //内存角点存放
-	cuda::GpuMat DescriptorG1, DescriptorG2; //显存描述子
+	cuda::GpuMat Src1G, Src2G;                                                          //显存图像
+	cuda::GpuMat KPsG1, KPsG2;                                                          //显存角点存放
+	vector<KeyPoint> KPsC1, KPsC2;                                                      //内存角点存放
+	cuda::GpuMat DescriptorG1, DescriptorG2;                                            //显存描述子
 	Src1G.upload(Src1);
 	Src2G.upload(Src2);
 
-	cuda::SURF_CUDA Surf_detector(150);  //surf检测器
+	cuda::SURF_CUDA Surf_detector(150);                                                 //surf检测器
 	Surf_detector(Src1G, cuda::GpuMat(), KPsG1, DescriptorG1);
 	Surf_detector(Src2G, cuda::GpuMat(), KPsG2, DescriptorG2);
 
 	Ptr<cuda::DescriptorMatcher> MatcherG = cuda::DescriptorMatcher::createBFMatcher(); //角点匹配
-	vector<vector<DMatch>> DMatchesG;  //显存匹配关系
-	MatcherG->knnMatch(DescriptorG1, DescriptorG1, DMatchesG, 3); //KNN匹配
+	vector<vector<DMatch>> DMatchesG;                                                   //显存匹配关系
+	MatcherG->knnMatch(DescriptorG1, DescriptorG1, DMatchesG, 3);                       //KNN匹配
 	Surf_detector.downloadKeypoints(KPsG1, KPsC1);
-	Surf_detector.downloadKeypoints(KPsG2, KPsC2);  //匹配结果下载至内存
+	Surf_detector.downloadKeypoints(KPsG2, KPsC2);                                      //匹配结果下载至内存
 
 	vector<DMatch> Selected_matchs;
 	for (int i = 0; i < MIN(KPsC1.size() - 1, DMatchesG.size()); i++)

@@ -166,5 +166,3 @@ void HistogramCGYT(Mat Src);
 
 //新写一个文件用来放纯数学的方法，已经写进去的什么迭代求解方程啊就不挪了
 #define MathActivate 1  //数学方法是否启用的宏定义 1-启用 2-不启用
-
-#include "MathCgyt.h"

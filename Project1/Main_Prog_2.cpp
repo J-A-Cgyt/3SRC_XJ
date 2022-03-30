@@ -1,6 +1,7 @@
 #include "Func_Proj_2nd.h"
 #include <ctime>
 #include "DataTransTCP.h"
+#include "MathCgyt.h"
 
 //#define XPS15
 #ifdef XPS15
@@ -33,7 +34,7 @@ string LoadPath_Msi_A = "F:\\Pictures\\Test For Programming\\噪声测试图像.png";
 #endif
 
 string LoadPath_Msi_B("F:\\Pictures\\Test For Programming\\FreqFilterSrc.png");  
-string LoadPath_Msi_C = "F:\\Pictures\\Test For Programming\\1.jpg"; 
+string LoadPath_Msi_C("F:\\Pictures\\Test For Programming\\1.jpg"); 
 string LoadPath_Msi_D("F:\\Pictures\\Test For Programming\\coins\\coin_2.bmp");
 
 //string SavePath_Msi_0("F:\\Pictures\\Test For Programming\\coins\\coin_2_thres54.jpg");
@@ -46,7 +47,7 @@ Mat SRC_2nd; //全局源图
 Mat DST_2nd; //全局输出图
 //clock_t Start, End;
 
-//#define SUBPIX 1
+#define SUBPIX 1
 //#define MEAN_VAR_CAL 1
 
 //关于自制卷积函数的枚举类型说明
@@ -68,27 +69,27 @@ enum Iris_dect
 int main()
 {
 	//20210924暂时注释
-	//std::vector<Mat> Temp_Array;
+	std::vector<Mat> Temp_Array;
 	Mat Temp_Buffer;
-	//namedWindow(window_name, WINDOW_NORMAL);
-	////namedWindow(window_name, WINDOW_AUTOSIZE);
+	namedWindow(window_name, WINDOW_NORMAL);
+	//namedWindow(window_name, WINDOW_AUTOSIZE);
 
-	////原始图像组读取	
-	//SRC_2nd = imread(LoadPath_Msi_D, IMREAD_GRAYSCALE);
-	//cout << SRC_2nd.type();
-	//if (!SRC_2nd.data)
-	//{
-	//	cout << "读取失败" << endl;
-	//	return -1;
-	//}
-	//cv::imshow(window_name, SRC_2nd);
-	//cv::waitKey(0);
-	//Temp_Array.push_back(SRC_2nd);  //Temp_Array[0];
-	//Temp_Buffer = SRC_2nd.clone();
+	//原始图像组读取	
+	SRC_2nd = imread(LoadPath_Msi_D, IMREAD_GRAYSCALE);
+	cout << SRC_2nd.type();
+	if (!SRC_2nd.data)
+	{
+		cout << "读取失败" << endl;
+		return -1;
+	}
+	cv::imshow(window_name, SRC_2nd);
+	cv::waitKey(0);
+	Temp_Array.push_back(SRC_2nd);  //Temp_Array[0];
+	Temp_Buffer = SRC_2nd.clone();
  
 #ifdef SUBPIX
 	//GaussianBlur(Temp_Buffer, Temp_Buffer, cv::Size(7, 7), 0);
-	Temp_Array.push_back(Temp_Buffer);
+	//Temp_Array.push_back(Temp_Buffer);
 
 	//边缘图像计算
 	Laplacian(Temp_Buffer, Temp_Buffer, CV_8UC1);
@@ -102,7 +103,7 @@ int main()
 
 	//OTSU之前最好弄个边缘检测的
 	double otsu_value = threshold(SRC_2nd, Temp_Buffer, 0, 255, THRESH_OTSU);  //顺便把otsu的值记录一下 73 直接OTSU
-	//double otsu_value = threshold(masked, Temp_Buffer, 0, 255, THRESH_OTSU);     //顺便把otsu的值记录一下 54 边缘强化OTSU
+//	double otsu_value = threshold(masked, Temp_Buffer, 0, 255, THRESH_OTSU);     //顺便把otsu的值记录一下 54 边缘强化OTSU
 	threshold(SRC_2nd, Temp_Buffer, otsu_value, 255, THRESH_BINARY);
 	imshow(window_name, Temp_Buffer);
 	waitKey(0);
@@ -160,10 +161,14 @@ int main()
 
 	//模板匹配学习 20210924
 	//template_matching_test();
-	Calib_Cgyt(Temp_Buffer);
-
 
 	//destroyAllWindows(); //销毁所有窗口，手动内存管理
+	Point3d circle_info(0.0f, 0.0f, 0.0f);
+	double error = 0.0f;
+	minSqureFitCircle(subpixPoints, circle_info, error);
+
+	//20220330 要不要再整个RANSAC的？圆拟合？
+
 
 	return 0;
 }

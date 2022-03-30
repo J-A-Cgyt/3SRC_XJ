@@ -1,5 +1,6 @@
 #include "Func_Proj_2nd.h"
 #include <thread>
+#include "MathCgyt.h"
 
 #define ViewFilter 1 //用于启动关闭频域滤波滤镜显示的宏开关
 

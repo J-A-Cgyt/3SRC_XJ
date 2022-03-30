@@ -4,11 +4,13 @@
 
 Mat SRC,DST;
 
-string Load_Path_1 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Circle_in_slot_2\\CIS_2.jpg";
-string Load_Path_2 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Circle_in_slot_2_BackLight\\CIS_B_1.jpg";
-string Load_Path_3 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Full_circle\\20191114-102834-305.jpg"; //20200335 完成
-string Load_Path_4 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Side_slot\\20191114-110032-155.jpg";
-string Load_Path_5 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Top_slot\\20191114-110910-75.jpg";
+//string Load_Path_1 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Circle_in_slot_2\\CIS_2.jpg";
+//string Load_Path_2 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Circle_in_slot_2_BackLight\\CIS_B_1.jpg";
+//string Load_Path_3 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Full_circle\\20191114-102834-305.jpg"; //20200335 完成
+//string Load_Path_4 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Side_slot\\20191114-110032-155.jpg";
+//string Load_Path_5 = "G:\\Pictures\\Test For Programming\\PIC_BXG\\Top_slot\\20191114-110910-75.jpg";
+
+string LoadPath_Msi_D("F:\\Pictures\\Test For Programming\\coins\\coin_2.bmp");
 
 string Window_Name = "Demo_Result";
 
@@ -22,11 +24,11 @@ int main()
 	//vector<vector<Point>> BY_Contours;
 	vector<Vec3f> Circles;
 	vector<vector<Vec3f>> Array_of_circles;
-	vector<Vec2f> Lines;  //直线检测的测试代码，于2019/11/12开始更新
+	vector<Vec2f> Lines;                         //直线检测的测试代码，于2019/11/12开始更新
     
 	namedWindow(Window_Name, WINDOW_NORMAL);
 	
-	SRC = imread(Load_Path_5);
+	SRC = imread(LoadPath_Msi_D);
 	if (!SRC.data)
 	{
 		cout << "图像读取失败" << endl;
@@ -43,10 +45,10 @@ int main()
 	//imshow(Window_Name, Temp1);
 	//waitKey(0);
 
-	Temp1 = Gaosi_Mohu(SRC, GS_Ksize); //高斯模糊
-	//Temp3 = Gaosi_双边(SRC);  //边缘保持滤波尝试
-	imshow(Window_Name, Temp1);
-	waitKey(0);
+	//Temp1 = Gaosi_Mohu(SRC, GS_Ksize); //高斯模糊
+	////Temp3 = Gaosi_双边(SRC);  //边缘保持滤波尝试
+	//imshow(Window_Name, Temp1);
+	//waitKey(0);
 
 //以下是金属盘型零件空洞位置及尺寸检测的测试代码，精度未验证，起始时间	
 	//Circles = Hough_circle(Temp1, Map);  //一级圆检测
@@ -63,20 +65,25 @@ int main()
 	具体方法实现如下，霍夫变换代码与前面三类图像复用
 */
 
-//-------------------------------------------------以下为Hough变换方法实现----------------------------------------------------------------------------------------------------
+//----------------------------------以下为Hough变换方法实现----------------------------------------
 	Hough_Param Param_FC;
 
-	Temp2 = ZhiFangTu_JunHua(Temp1);
-	cout << "直方图均化结果" << endl;
-	imshow(Window_Name, Temp2);
-	waitKey(0);
+	//Temp2 = ZhiFangTu_JunHua(Temp1);
+	//cout << "直方图均化结果" << endl;
+	//imshow(Window_Name, Temp2);
+	//waitKey(0);
 
-	Circles = Hough_circle_Class(Temp1,Map,Param_FC);
-	if (Circles.size() == 0)
-	{
-		cout << "未检测到圆" << endl;
-		//return 1;
-	}
+
+	Param_FC.dp           = 1.0f;
+	Param_FC.Hough_Method = HOUGH_GRADIENT;
+	Param_FC.mindist      = 50;
+	Param_FC.minRadius    = 600;
+	Param_FC.maxRadius    = 700;
+	Param_FC.Param1       = 170;
+	Param_FC.Param2       = 60;
+
+	Circles = Hough_circle_Class(SRC, Map, Param_FC);
+	if (Circles.size() == 0){ cout << "未检测到圆" << endl; }
 	Array_of_circles.push_back(Circles);
 
 /*

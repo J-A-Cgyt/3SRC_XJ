@@ -137,11 +137,11 @@ Mat JiaoDian_SURF_CGYT(Mat Src1, Mat Src2) //surf角点检测代码
 	match_cgyt.match(descriptor1_Q, descriptor2_T, matchs_cgyt);
 	Mat Result;
 
-	/* 画出所有的匹配点
-	drawMatches(temp1, KeyPoints_1, temp2, KeyPoints_2, matchs_cgyt,Result);
-	imshow(window_name_f1, Result);
-	waitKey(0);
-	*/
+	//画出所有的匹配点
+	//drawMatches(temp1, KeyPoints_1_Q, temp2, KeyPoints_2_T, matchs_cgyt,Result);
+	//imshow(window_name_f1, Result);
+	//waitKey(0);
+
 
 	//排序前60个匹配点（值小的，依据为Dmatch.distance,从小到大排）
 	std::nth_element(matchs_cgyt.begin(), matchs_cgyt.begin() + 59, matchs_cgyt.end());
